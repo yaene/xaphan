@@ -7,6 +7,7 @@ import Html
 import Html.Attributes as HtmlAttr
 import Html.Events exposing (keyCode)
 import Json.Decode
+import Random
 import Svg exposing (rect)
 import Svg.Attributes as SvgAttr
 
@@ -21,8 +22,20 @@ type alias Pos =
     ( Int, Int )
 
 
+type Dir
+    = Left
+    | Right
+    | None
+
+
 type alias Enemy =
-    { pos : Pos, hp : Int }
+    { pos : Pos
+    , hp : Int
+    , animationElapsed : Float
+    , dir : Dir
+    , changeDirElapsed : Float
+    , changeDir : Bool
+    }
 
 
 type Msg
@@ -31,6 +44,7 @@ type Msg
     | MoveHeroLeft Bool
     | MoveHeroRight Bool
     | Tick Float
+    | ChangeEnemyDir ( Int, Dir )
     | Noop
 
 
@@ -46,7 +60,7 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model (Hero.init ()) [ Enemy ( 50, 50 ) 3 ], Cmd.none )
+    ( Model (Hero.init ()) [ Enemy ( 50, 50 ) 3 0 Right 0 False ], Cmd.none )
 
 
 view : Model -> Html.Html Msg
@@ -148,14 +162,140 @@ update msg model =
             )
 
         Tick elapsed ->
-            ( { model | hero = Hero.moveHero hero }, Cmd.none )
+            model |> animate elapsed
 
-        _ ->
+        ChangeEnemyDir ( index, dir ) ->
+            ( model |> changeEnemyDir index dir, Cmd.none )
+
+        Noop ->
             ( model, Cmd.none )
+
+
+animate : Float -> Model -> ( Model, Cmd Msg )
+animate elapsed model =
+    let
+        nModel =
+            { model | hero = Hero.moveHero model.hero }
+    in
+    nModel |> animateEnemies elapsed
 
 
 drawEnemies model =
     model.enemies |> List.map drawEnemy
+
+
+animateEnemies : Float -> Model -> ( Model, Cmd Msg )
+animateEnemies elapsed model =
+    ( { model
+        | enemies =
+            model.enemies |> List.map (animateEnemy elapsed)
+      }
+    , generateRandomEnemyDirs model.enemies
+    )
+
+
+generateRandomEnemyDirs : List Enemy -> Cmd Msg
+generateRandomEnemyDirs enemies =
+    enemies
+        |> List.indexedMap (\index enemy -> randomDirGenerator index enemy)
+        |> List.filterMap identity
+        |> List.map (Random.generate ChangeEnemyDir)
+        |> Cmd.batch
+
+
+randomDirGenerator : Int -> Enemy -> Maybe (Random.Generator ( Int, Dir ))
+randomDirGenerator index enemy =
+    if enemy.changeDir then
+        let
+            randomDir =
+                case enemy.dir of
+                    Left ->
+                        Random.uniform Right [ None ]
+
+                    Right ->
+                        Random.uniform Left [ None ]
+
+                    None ->
+                        Random.uniform Right [ Left ]
+        in
+        Just (randomDir |> Random.andThen (\dir -> Random.constant ( index, dir )))
+
+    else
+        Nothing
+
+
+changeEnemyDir index dir model =
+    let
+        enemies =
+            model.enemies
+    in
+    { model
+        | enemies =
+            enemies
+                |> List.indexedMap
+                    (\i enemy ->
+                        if i == index then
+                            { enemy | dir = dir }
+
+                        else
+                            enemy
+                    )
+    }
+
+
+animateEnemy : Float -> Enemy -> Enemy
+animateEnemy elapsed enemy =
+    enemy
+        |> moveEnemy elapsed
+        |> animateDirChange elapsed
+
+
+animateDirChange elapsed enemy =
+    let
+        changeDirElapsed_ =
+            enemy.changeDirElapsed + elapsed
+
+        interval =
+            2000
+    in
+    if changeDirElapsed_ > interval then
+        { enemy | changeDirElapsed = changeDirElapsed_ - interval, changeDir = True }
+
+    else
+        { enemy | changeDirElapsed = changeDirElapsed_, changeDir = False }
+
+
+moveEnemy : Float -> Enemy -> Enemy
+moveEnemy elapsed enemy =
+    let
+        ( x, y ) =
+            enemy.pos
+
+        dx =
+            5
+
+        interval =
+            20
+
+        animationElapsed_ =
+            enemy.animationElapsed + elapsed
+
+        dirFactor =
+            case enemy.dir of
+                Left ->
+                    -1
+
+                Right ->
+                    1
+
+                None ->
+                    0
+    in
+    if animationElapsed_ > interval then
+        { enemy | pos = ( x + dirFactor * dx, y ), animationElapsed = animationElapsed_ - interval }
+
+    else
+        { enemy | animationElapsed = animationElapsed_ }
 
 
 drawEnemy enemy =
