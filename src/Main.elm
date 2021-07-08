@@ -2,18 +2,27 @@ module Main exposing (main)
 
 import Browser
 import Browser.Events exposing (onAnimationFrameDelta, onKeyDown, onKeyUp)
-import Dict exposing (update)
 import Hero
 import Html
 import Html.Attributes as HtmlAttr
 import Html.Events exposing (keyCode)
 import Json.Decode
-import Svg
+import Svg exposing (rect)
 import Svg.Attributes as SvgAttr
 
 
 type alias Model =
-    { hero : Hero.Hero }
+    { hero : Hero.Hero
+    , enemies : List Enemy
+    }
+
+
+type alias Pos =
+    ( Int, Int )
+
+
+type alias Enemy =
+    { pos : Pos, hp : Int }
 
 
 type Msg
@@ -37,7 +46,7 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model (Hero.init ()), Cmd.none )
+    ( Model (Hero.init ()) [ Enemy ( 50, 50 ) 3 ], Cmd.none )
 
 
 view : Model -> Html.Html Msg
@@ -56,7 +65,9 @@ view model =
                 , SvgAttr.width "100%"
                 , SvgAttr.viewBox "0 0 1000 1000"
                 ]
-                [ Hero.draw model.hero ]
+                (Hero.draw model.hero
+                    :: drawEnemies model
+                )
             ]
         ]
 
@@ -141,3 +152,22 @@ update msg model =
 
         _ ->
             ( model, Cmd.none )
+
+
+drawEnemies model =
+    model.enemies |> List.map drawEnemy
+
+
+drawEnemy enemy =
+    let
+        ( x, y ) =
+            enemy.pos
+    in
+    Svg.rect
+        [ SvgAttr.x <| String.fromInt x
+        , SvgAttr.y <| String.fromInt y
+        , SvgAttr.fill "orange"
+        , SvgAttr.width "80"
+        , SvgAttr.height "100"
+        ]
+        []
