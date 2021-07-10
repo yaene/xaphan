@@ -15,7 +15,12 @@ import Svg.Attributes as SvgAttr
 type alias Model =
     { hero : Hero.Hero
     , enemies : List Enemy
+    , enemyBullets : List EnemyBullet
     }
+
+
+type alias EnemyBullet =
+    { pos : Pos, dx : Int, dy : Int }
 
 
 type alias Pos =
@@ -29,6 +34,8 @@ type alias Enemy =
     , dir : Dir
     , changeDirElapsed : Float
     , changeDir : Bool
+    , shootBulletElapsed : Float
+    , shootBullet : Bool
     }
 
 
@@ -54,7 +61,7 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model (Hero.init ()) [ Enemy ( 50, 50 ) 3 0 Right 0 False ], Cmd.none )
+    ( Model (Hero.init ()) [ Enemy ( 50, 50 ) 3 0 Right 0 False 0 False ] [], Cmd.none )
 
 
 view : Model -> Html.Html Msg
@@ -196,12 +203,36 @@ animateEnemies elapsed model =
                             Nothing
                     )
                 |> List.filterMap identity
+
+        shootBulletEnemies =
+            newEnemies |> List.filter .shootBullet
     in
     ( { model
         | enemies = newEnemies
+        , enemyBullets = animateEnemyBullets shootBulletEnemies model.enemyBullets
       }
     , Dir.generateRandomDirs changeDirEnemies ChangeEnemyDir
     )
+
+
+animateEnemyBullets : List Enemy -> List EnemyBullet -> List EnemyBullet
+animateEnemyBullets shooters bullets =
+    bullets
+        |> List.map animateEnemyBullet
+        |> (++) (List.map shootBullet shooters)
+
+
+shootBullet : Enemy -> EnemyBullet
+shootBullet shooter =
+    EnemyBullet shooter.pos 0 5
+
+
+animateEnemyBullet bullet =
+    let
+        ( x, y ) =
+            bullet.pos
+    in
+    { bullet | pos = ( x, y + bullet.dy ) }
 
 
 changeEnemyDir : Int -> Dir -> Model -> Model
@@ -229,6 +260,23 @@ animateEnemy elapsed enemy =
     enemy
         |> moveEnemy elapsed
         |> animateDirChange elapsed
+        |> animateShootBullet elapsed
+
+
+animateShootBullet : Float -> Enemy -> Enemy
+animateShootBullet elapsed enemy =
+    let
+        shootBulletElapsed =
+            enemy.shootBulletElapsed + elapsed
+
+        interval =
+            1000
+    in
+    if shootBulletElapsed > interval then
+        { enemy | shootBulletElapsed = shootBulletElapsed - interval }
+
+    else
+        { enemy | shootBulletElapsed = shootBulletElapsed }
 
 
 animateDirChange : Float -> Enemy -> Enemy
