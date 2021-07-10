@@ -81,7 +81,9 @@ view model =
                 , SvgAttr.viewBox "0 0 1000 1000"
                 ]
                 (Hero.draw model.hero
-                    :: drawEnemies model
+                    :: (drawEnemies model
+                            ++ drawBullets model
+                       )
                 )
             ]
         ]
@@ -184,6 +186,27 @@ animate elapsed model =
 drawEnemies : Model -> List (Svg Msg)
 drawEnemies model =
     model.enemies |> List.map drawEnemy
+
+
+drawBullets : Model -> List (Svg Msg)
+drawBullets model =
+    model.enemyBullets |> List.map drawBullet
+
+
+drawBullet : EnemyBullet -> Svg Msg
+drawBullet bullet =
+    let
+        ( x, y ) =
+            bullet.pos
+    in
+    Svg.rect
+        [ SvgAttr.x <| String.fromInt x
+        , SvgAttr.y <| String.fromInt y
+        , SvgAttr.fill "red"
+        , SvgAttr.width "10"
+        , SvgAttr.height "20"
+        ]
+        []
 
 
 animateEnemies : Float -> Model -> ( Model, Cmd Msg )
