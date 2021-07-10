@@ -8,7 +8,7 @@ import Html.Attributes as HtmlAttr
 import Html.Events exposing (keyCode)
 import Json.Decode
 import Random
-import Svg exposing (rect)
+import Svg exposing (Svg, rect)
 import Svg.Attributes as SvgAttr
 
 
@@ -180,6 +180,7 @@ animate elapsed model =
     nModel |> animateEnemies elapsed
 
 
+drawEnemies : Model -> List (Svg Msg)
 drawEnemies model =
     model.enemies |> List.map drawEnemy
 
@@ -224,6 +225,7 @@ randomDirGenerator index enemy =
         Nothing
 
 
+changeEnemyDir : Int -> Dir -> Model -> Model
 changeEnemyDir index dir model =
     let
         enemies =
@@ -250,6 +252,7 @@ animateEnemy elapsed enemy =
         |> animateDirChange elapsed
 
 
+animateDirChange : Float -> Enemy -> Enemy
 animateDirChange elapsed enemy =
     let
         changeDirElapsed_ =
@@ -298,6 +301,7 @@ moveEnemy elapsed enemy =
         { enemy | animationElapsed = animationElapsed_ }
 
 
+drawEnemy : Enemy -> Svg Msg
 drawEnemy enemy =
     let
         ( x, y ) =
