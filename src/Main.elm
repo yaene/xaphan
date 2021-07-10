@@ -215,17 +215,11 @@ animateEnemies elapsed model =
         newEnemies =
             model.enemies |> List.map (animateEnemy elapsed)
 
+        -- find enemies that should change direction and their index
         changeDirEnemies =
             newEnemies
-                |> List.indexedMap
-                    (\index enemy ->
-                        if enemy.changeDir then
-                            Just ( index, enemy )
-
-                        else
-                            Nothing
-                    )
-                |> List.filterMap identity
+                |> List.indexedMap Tuple.pair
+                |> List.filter (Tuple.second >> .changeDir)
 
         shootBulletEnemies =
             newEnemies |> List.filter .shootBullet
