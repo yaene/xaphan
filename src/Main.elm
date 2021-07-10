@@ -308,15 +308,11 @@ animateDirChange elapsed enemy =
         enemyWidth =
             80
     in
-    if
-        changeDirElapsed_
-            > interval
-            || not (inBoundsX enemy.pos enemyWidth)
-    then
+    if changeDirElapsed_ > interval || enemy.changeDir then
         { enemy | changeDirElapsed = changeDirElapsed_ - interval, changeDir = True }
 
     else
-        { enemy | changeDirElapsed = changeDirElapsed_, changeDir = False }
+        { enemy | changeDirElapsed = changeDirElapsed_ }
 
 
 inBoundsX : Pos -> Int -> Bool
@@ -325,7 +321,7 @@ inBoundsX ( x, _ ) width =
         maxX =
             1000
     in
-    x > 0 && x + width < maxX
+    x >= 0 && x + width <= maxX
 
 
 moveEnemy : Float -> Enemy -> Enemy
@@ -353,9 +349,16 @@ moveEnemy elapsed enemy =
 
                 None ->
                     0
+
+        newX =
+            x + dirFactor * dx
     in
     if animationElapsed_ > interval then
-        { enemy | pos = ( x + dirFactor * dx, y ), animationElapsed = animationElapsed_ - interval }
+        if inBoundsX ( newX, y ) 80 then
+            { enemy | pos = ( newX, y ), animationElapsed = animationElapsed_ - interval, changeDir = False }
+
+        else
+            { enemy | pos = ( x, y ), animationElapsed = animationElapsed_ - interval, changeDir = True }
 
     else
         { enemy | animationElapsed = animationElapsed_ }
