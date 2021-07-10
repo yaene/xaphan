@@ -2,12 +2,12 @@ module Main exposing (main)
 
 import Browser
 import Browser.Events exposing (onAnimationFrameDelta, onKeyDown, onKeyUp)
+import Dir exposing (Dir(..))
 import Hero
 import Html
 import Html.Attributes as HtmlAttr
 import Html.Events exposing (keyCode)
 import Json.Decode
-import Random
 import Svg exposing (Svg, rect)
 import Svg.Attributes as SvgAttr
 
@@ -20,12 +20,6 @@ type alias Model =
 
 type alias Pos =
     ( Int, Int )
-
-
-type Dir
-    = Left
-    | Right
-    | None
 
 
 type alias Enemy =
@@ -187,42 +181,27 @@ drawEnemies model =
 
 animateEnemies : Float -> Model -> ( Model, Cmd Msg )
 animateEnemies elapsed model =
-    ( { model
-        | enemies =
+    let
+        newEnemies =
             model.enemies |> List.map (animateEnemy elapsed)
+
+        changeDirEnemies =
+            newEnemies
+                |> List.indexedMap
+                    (\index enemy ->
+                        if enemy.changeDir then
+                            Just ( index, enemy )
+
+                        else
+                            Nothing
+                    )
+                |> List.filterMap identity
+    in
+    ( { model
+        | enemies = newEnemies
       }
-    , generateRandomEnemyDirs model.enemies
+    , Dir.generateRandomDirs changeDirEnemies ChangeEnemyDir
     )
-
-
-generateRandomEnemyDirs : List Enemy -> Cmd Msg
-generateRandomEnemyDirs enemies =
-    enemies
-        |> List.indexedMap (\index enemy -> randomDirGenerator index enemy)
-        |> List.filterMap identity
-        |> List.map (Random.generate ChangeEnemyDir)
-        |> Cmd.batch
-
-
-randomDirGenerator : Int -> Enemy -> Maybe (Random.Generator ( Int, Dir ))
-randomDirGenerator index enemy =
-    if enemy.changeDir then
-        let
-            randomDir =
-                case enemy.dir of
-                    Left ->
-                        Random.uniform Right [ None ]
-
-                    Right ->
-                        Random.uniform Left [ None ]
-
-                    None ->
-                        Random.uniform Right [ Left ]
-        in
-        Just (randomDir |> Random.andThen (\dir -> Random.constant ( index, dir )))
-
-    else
-        Nothing
 
 
 changeEnemyDir : Int -> Dir -> Model -> Model
