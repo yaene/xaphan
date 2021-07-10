@@ -296,10 +296,10 @@ animateShootBullet elapsed enemy =
             1000
     in
     if shootBulletElapsed > interval then
-        { enemy | shootBulletElapsed = shootBulletElapsed - interval }
+        { enemy | shootBulletElapsed = shootBulletElapsed - interval, shootBullet = True }
 
     else
-        { enemy | shootBulletElapsed = shootBulletElapsed }
+        { enemy | shootBulletElapsed = shootBulletElapsed, shootBullet = False }
 
 
 animateDirChange : Float -> Enemy -> Enemy
