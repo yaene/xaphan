@@ -1,4 +1,4 @@
-module Field exposing (Pos, inBoundsX)
+module Field exposing (Pos, inBoundsX, moveBy)
 
 
 type alias Pos =
@@ -12,3 +12,8 @@ inBoundsX ( x, _ ) width =
             1000
     in
     x >= 0 && x + width <= maxX
+
+
+moveBy : Pos -> Pos -> Pos
+moveBy ( dx, dy ) ( x, y ) =
+    ( x + dx, y + dy )

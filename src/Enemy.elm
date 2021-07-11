@@ -1,10 +1,26 @@
 module Enemy exposing (Enemy, EnemyBullet, animateEnemies, changeEnemyDir, drawBullets, drawEnemies)
 
 import Dir exposing (Dir(..))
-import Field exposing (Pos, inBoundsX)
+import Field exposing (Pos, inBoundsX, moveBy)
 import Messages exposing (Msg(..))
 import Svg exposing (Svg, rect)
 import Svg.Attributes as SvgAttr
+
+
+enemyWidth =
+    80
+
+
+enemyHeight =
+    100
+
+
+bulletWidth =
+    10
+
+
+bulletHeight =
+    20
 
 
 type alias Enemy =
@@ -43,8 +59,8 @@ drawBullet bullet =
         [ SvgAttr.x <| String.fromInt x
         , SvgAttr.y <| String.fromInt y
         , SvgAttr.fill "red"
-        , SvgAttr.width "10"
-        , SvgAttr.height "20"
+        , SvgAttr.width <| String.fromInt bulletWidth
+        , SvgAttr.height <| String.fromInt bulletHeight
         ]
         []
 
@@ -79,7 +95,7 @@ animateEnemyBullets shooters bullets =
 
 shootBullet : Enemy -> EnemyBullet
 shootBullet shooter =
-    EnemyBullet shooter.pos 0 5
+    EnemyBullet (moveBy ( round <| enemyWidth / 2, enemyHeight ) shooter.pos) 0 5
 
 
 animateEnemyBullet bullet =
@@ -135,9 +151,6 @@ animateDirChange elapsed enemy =
 
         interval =
             2000
-
-        enemyWidth =
-            80
     in
     if changeDirElapsed_ > interval || enemy.changeDir then
         { enemy | changeDirElapsed = changeDirElapsed_ - interval, changeDir = True }
@@ -176,7 +189,7 @@ moveEnemy elapsed enemy =
             x + dirFactor * dx
     in
     if animationElapsed_ > interval then
-        if inBoundsX ( newX, y ) 80 then
+        if inBoundsX ( newX, y ) enemyWidth then
             { enemy | pos = ( newX, y ), animationElapsed = animationElapsed_ - interval, changeDir = False }
 
         else
@@ -192,11 +205,11 @@ drawEnemy enemy =
         ( x, y ) =
             enemy.pos
     in
-    Svg.rect
+    rect
         [ SvgAttr.x <| String.fromInt x
         , SvgAttr.y <| String.fromInt y
         , SvgAttr.fill "orange"
-        , SvgAttr.width "80"
-        , SvgAttr.height "100"
+        , SvgAttr.width <| String.fromInt enemyWidth
+        , SvgAttr.height <| String.fromInt enemyHeight
         ]
         []
