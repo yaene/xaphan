@@ -17,9 +17,13 @@ type alias Hero =
 
 type Dir
     = Up
+    | UpRight
     | Right
+    | DownRight
     | Down
+    | DownLeft
     | Left
+    | UpLeft
     | None
 
 
@@ -70,6 +74,18 @@ moveHero hero =
         Down ->
             { hero | y = hero.y - speed }
 
+        UpLeft ->
+            { hero | y = hero.y + round (speed / sqrt 2), x = hero.x - round (speed / sqrt 2) }
+
+        UpRight ->
+            { hero | y = hero.y + round (speed / sqrt 2), x = hero.x + round (speed / sqrt 2) }
+
+        DownLeft ->
+            { hero | y = hero.y - round (speed / sqrt 2), x = hero.x - round (speed / sqrt 2) }
+
+        DownRight ->
+            { hero | y = hero.y - round (speed / sqrt 2), x = hero.x + round (speed / sqrt 2) }
+
         None ->
             hero
 
@@ -80,13 +96,31 @@ startMove hero =
 
 
 direction : Hero -> Dir
-direction { moveLeft, moveRight } =
-    case ( moveLeft, moveRight ) of
-        ( True, False ) ->
+direction { moveLeft, moveRight, moveUp, moveDown } =
+    case ( ( moveLeft, moveRight ), ( moveDown, moveUp ) ) of
+        ( ( True, False ), ( False, False ) ) ->
             Left
 
-        ( False, True ) ->
+        ( ( False, True ), ( False, False ) ) ->
             Right
+
+        ( ( False, True ), ( True, False ) ) ->
+            DownRight
+
+        ( ( False, True ), ( False, True ) ) ->
+            UpRight
+
+        ( ( True, False ), ( False, True ) ) ->
+            UpLeft
+
+        ( ( True, False ), ( True, False ) ) ->
+            DownLeft
+
+        ( ( False, False ), ( True, False ) ) ->
+            Down
+
+        ( ( False, False ), ( False, True ) ) ->
+            Up
 
         _ ->
             None
