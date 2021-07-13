@@ -1,14 +1,12 @@
-module Hero exposing (Hero, draw, getEdges, init, moveHero, startMove)
+module Hero exposing (Hero, draw, init, moveHero, startMove)
 
-import Svg exposing (Svg, g, path)
-import Html.Attributes exposing (attribute, id)
-import CoreTypes exposing (Dir(..))
-import Svg.Attributes exposing (d, fill, fillRule, style, transform, viewBox, width)
+import Svg exposing (Svg, rect)
+import Svg.Attributes as SvgAttr
 
 
 type alias Hero =
-    { x : Float
-    , y : Float
+    { x : Int
+    , y : Int
     , moveRight : Bool
     , moveLeft : Bool
     , moveUp : Bool
@@ -16,57 +14,45 @@ type alias Hero =
     , heroDir : Dir
     }
 
-heroWidth : number
+
+type Dir
+    = Up
+    | Right
+    | Down
+    | Left
+    | None
+
+
+heroWidth : Int
 heroWidth =
     90
+
+
+heroHeight : Int
+heroHeight =
+    120
+
 
 speed : number
 speed =
     15
 
+
 init : () -> Hero
 init _ =
-    Hero 500 100 False False False False None
+    Hero 500 800 False False False False None
 
 
 draw : Hero -> Svg msg
 draw hero =
-    let
-        w =
-            String.fromFloat heroWidth
-
-        offset =
-            String.fromFloat (heroWidth / 2)
-
-        hero =
-            case hero.heroDir of
-                Left ->
-                    [ g [ transform <| "translate(" ++ offset ++ ") scale(-1 1)" ]
-                        [ drawRunning w ]
-                    ]
-
-                Right ->
-                    [ g [ transform <| "translate(-" ++ offset ++ ")" ]
-                        [ drawRunning w ]
-                    ]
-
-                Up ->
-                    [ g [ transform <| "translate(" ++ offset ++ ")" ]
-                        [ drawRunning w ]
-                    ]
-
-                Down ->
-                    [ g [ transform <| "translate(-" ++ offset ++ ") scale(1 -1)" ]
-                        [ drawRunning w ]
-                    ]
-
-                None ->
-                    [ g [ transform <| "translate(-" ++ offset ++ ")" ]
-                        [ drawStraight w ]
-                    ]
-    in
-    g [ transform <| "translate(" ++ String.fromFloat hero.x ++ ")" ]
-        hero
+    Svg.rect
+        [ SvgAttr.x <| String.fromInt hero.x
+        , SvgAttr.y <| String.fromInt hero.y
+        , SvgAttr.height <| String.fromInt heroHeight
+        , SvgAttr.width <| String.fromInt heroWidth
+        , SvgAttr.fill "blue"
+        ]
+        []
 
 
 moveHero : Hero -> Hero
@@ -77,7 +63,7 @@ moveHero hero =
 
         Right ->
             { hero | x = hero.x + speed }
-        
+
         Up ->
             { hero | y = hero.y + speed }
 
@@ -93,23 +79,14 @@ startMove hero =
     { hero | heroDir = direction hero }
 
 
-getEdges : Hero -> ( Float, Float, Float, Float )
-getEdges hero =
-    ( hero.x - heroWidth / 2, hero.x + heroWidth / 2,  hero.y - heroWidth, hero.y + heroWidth)
-
 direction : Hero -> Dir
-direction { moveLeft, moveRight, moveDown, moveUp } =
-    case ( moveLeft, moveRight, moveDown, moveUp ) of
-        ( True, False, _, _ ) ->
+direction { moveLeft, moveRight } =
+    case ( moveLeft, moveRight ) of
+        ( True, False ) ->
             Left
 
-        ( False, True, _, _ ) ->
+        ( False, True ) ->
             Right
 
-        ( _, _, True, False ) ->
-            Down
-
-        ( _, _, False, True ) ->
-            Up
         _ ->
             None
