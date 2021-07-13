@@ -69,22 +69,22 @@ moveHero hero =
             { hero | x = hero.x + speed }
 
         Up ->
-            { hero | y = hero.y + speed }
-
-        Down ->
             { hero | y = hero.y - speed }
 
+        Down ->
+            { hero | y = hero.y + speed }
+
         UpLeft ->
-            { hero | y = hero.y + round (speed / sqrt 2), x = hero.x - round (speed / sqrt 2) }
-
-        UpRight ->
-            { hero | y = hero.y + round (speed / sqrt 2), x = hero.x + round (speed / sqrt 2) }
-
-        DownLeft ->
             { hero | y = hero.y - round (speed / sqrt 2), x = hero.x - round (speed / sqrt 2) }
 
-        DownRight ->
+        UpRight ->
             { hero | y = hero.y - round (speed / sqrt 2), x = hero.x + round (speed / sqrt 2) }
+
+        DownLeft ->
+            { hero | y = hero.y + round (speed / sqrt 2), x = hero.x - round (speed / sqrt 2) }
+
+        DownRight ->
+            { hero | y = hero.y + round (speed / sqrt 2), x = hero.x + round (speed / sqrt 2) }
 
         None ->
             hero
