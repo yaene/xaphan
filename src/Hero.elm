@@ -1,4 +1,4 @@
-module Hero exposing (Hero, draw, init, moveHero, startMove)
+module Hero exposing (Hero, draw, heroHeight, heroWidth, init, moveHero, startMove)
 
 import Svg exposing (Svg, rect)
 import Svg.Attributes as SvgAttr

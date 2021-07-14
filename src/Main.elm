@@ -2,27 +2,31 @@ module Main exposing (main)
 
 import Browser
 import Browser.Events exposing (onAnimationFrameDelta, onKeyDown, onKeyUp)
-import Dict exposing (update)
+import Collision exposing (isHeroHit)
+import Dir exposing (Dir(..))
+import Enemy exposing (Enemy, EnemyBullet, animateEnemies, changeEnemyDir, drawBullets, drawEnemies)
+import Field exposing (Pos)
 import Hero
 import Html
 import Html.Attributes as HtmlAttr
 import Html.Events exposing (keyCode)
 import Json.Decode
-import Svg
+import Messages exposing (Msg(..))
+import Svg exposing (Svg, rect)
 import Svg.Attributes as SvgAttr
 
 
 type alias Model =
-    { hero : Hero.Hero }
+    { hero : Hero.Hero
+    , enemies : List Enemy
+    , enemyBullets : List EnemyBullet
+    , state : State
+    }
 
 
-type Msg
-    = MoveHeroUp Bool
-    | MoveHeroDown Bool
-    | MoveHeroLeft Bool
-    | MoveHeroRight Bool
-    | Tick Float
-    | Noop
+type State
+    = Playing
+    | GameOver
 
 
 main : Program () Model Msg
@@ -37,7 +41,7 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model (Hero.init ()), Cmd.none )
+    ( Model (Hero.init ()) [ Enemy ( 50, 50 ) 3 0 Right 0 False 0 False ] [] Playing, Cmd.none )
 
 
 view : Model -> Html.Html Msg
@@ -56,7 +60,11 @@ view model =
                 , SvgAttr.width "100%"
                 , SvgAttr.viewBox "0 0 1000 1000"
                 ]
-                [ Hero.draw model.hero ]
+                (Hero.draw model.hero
+                    :: (drawEnemies model.enemies
+                            ++ drawBullets model.enemyBullets
+                       )
+                )
             ]
         ]
 
@@ -137,7 +145,32 @@ update msg model =
             )
 
         Tick elapsed ->
-            ( { model | hero = Hero.moveHero hero }, Cmd.none )
+            model |> animate elapsed
 
-        _ ->
+        ChangeEnemyDir ( index, dir ) ->
+            ( { model | enemies = changeEnemyDir index dir model.enemies }, Cmd.none )
+
+        Noop ->
             ( model, Cmd.none )
+
+
+animate : Float -> Model -> ( Model, Cmd Msg )
+animate elapsed model =
+    if model.state == Playing then
+        let
+            ( enemies, enemyBullets, cmd ) =
+                animateEnemies elapsed ( model.enemies, model.enemyBullets )
+        in
+        ( { model | hero = Hero.moveHero model.hero, enemies = enemies, enemyBullets = enemyBullets, state = newState model }, cmd )
+
+    else
+        ( model, Cmd.none )
+
+
+newState : Model -> State
+newState model =
+    if isHeroHit model.hero model.enemyBullets then
+        GameOver
+
+    else
+        Playing
