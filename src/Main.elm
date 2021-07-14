@@ -2,6 +2,7 @@ module Main exposing (main)
 
 import Browser
 import Browser.Events exposing (onAnimationFrameDelta, onKeyDown, onKeyUp)
+import Collision exposing (isHeroHit)
 import Dir exposing (Dir(..))
 import Enemy exposing (Enemy, EnemyBullet, animateEnemies, changeEnemyDir, drawBullets, drawEnemies)
 import Field exposing (Pos)
@@ -19,7 +20,13 @@ type alias Model =
     { hero : Hero.Hero
     , enemies : List Enemy
     , enemyBullets : List EnemyBullet
+    , state : State
     }
+
+
+type State
+    = Playing
+    | GameOver
 
 
 main : Program () Model Msg
@@ -34,7 +41,7 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model (Hero.init ()) [ Enemy ( 50, 50 ) 3 0 Right 0 False 0 False ] [], Cmd.none )
+    ( Model (Hero.init ()) [ Enemy ( 50, 50 ) 3 0 Right 0 False 0 False ] [] Playing, Cmd.none )
 
 
 view : Model -> Html.Html Msg
@@ -149,8 +156,21 @@ update msg model =
 
 animate : Float -> Model -> ( Model, Cmd Msg )
 animate elapsed model =
-    let
-        ( enemies, enemyBullets, cmd ) =
-            animateEnemies elapsed ( model.enemies, model.enemyBullets )
-    in
-    ( { model | hero = Hero.moveHero model.hero, enemies = enemies, enemyBullets = enemyBullets }, cmd )
+    if model.state == Playing then
+        let
+            ( enemies, enemyBullets, cmd ) =
+                animateEnemies elapsed ( model.enemies, model.enemyBullets )
+        in
+        ( { model | hero = Hero.moveHero model.hero, enemies = enemies, enemyBullets = enemyBullets, state = newState model }, cmd )
+
+    else
+        ( model, Cmd.none )
+
+
+newState : Model -> State
+newState model =
+    if isHeroHit model.hero model.enemyBullets then
+        GameOver
+
+    else
+        Playing
