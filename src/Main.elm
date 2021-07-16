@@ -6,7 +6,7 @@ import Collision exposing (isHeroHit)
 import Dir exposing (Dir(..))
 import Enemy exposing (Enemy, EnemyBullet, animateEnemies, changeEnemyDir, drawBullets, drawEnemies)
 import Field exposing (Pos)
-import Hero
+import Hero exposing (..)
 import Html
 import Html.Attributes as HtmlAttr
 import Html.Events exposing (keyCode)
@@ -18,6 +18,7 @@ import Svg.Attributes as SvgAttr
 
 type alias Model =
     { hero : Hero.Hero
+    , heroBullets : List HeroBullet
     , enemies : List Enemy
     , enemyBullets : List EnemyBullet
     , state : State
@@ -41,7 +42,7 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model (Hero.init ()) [ Enemy ( 50, 50 ) 3 0 Right 0 False 0 False ] [] Playing, Cmd.none )
+    ( Model (Hero.init ()) [] [ Enemy ( 50, 50 ) 3 0 Right 0 False 0 False ] [] Playing, Cmd.none )
 
 
 view : Model -> Html.Html Msg
@@ -60,9 +61,10 @@ view model =
                 , SvgAttr.width "100%"
                 , SvgAttr.viewBox "0 0 1000 1000"
                 ]
-                (Hero.draw model.hero
+                (drawHero model.hero
                     :: (drawEnemies model.enemies
                             ++ drawBullets model.enemyBullets
+                            ++ drawBullets model.heroBullets
                        )
                 )
             ]
@@ -113,6 +115,10 @@ key on keycode =
         87 ->
             MoveHeroUp on
 
+        -- key: z
+        90 ->
+            HeroShootBullet on
+
         _ ->
             Noop
 
@@ -144,6 +150,11 @@ update msg model =
             , Cmd.none
             )
 
+        HeroShootBullet on ->
+            ( { model | hero = Hero.startShooting hero }
+            , Cmd.none
+            )
+
         Tick elapsed ->
             model |> animate elapsed
 
@@ -160,8 +171,11 @@ animate elapsed model =
         let
             ( enemies, enemyBullets, cmd ) =
                 animateEnemies elapsed ( model.enemies, model.enemyBullets )
+
+            ( hero, heroBullets ) =
+                animateHero elapsed model.hero model.heroBullets
         in
-        ( { model | hero = Hero.moveHero model.hero, enemies = enemies, enemyBullets = enemyBullets, state = newState model }, cmd )
+        ( { model | hero = hero, heroBullets = heroBullets, enemies = enemies, enemyBullets = enemyBullets, state = newState model }, cmd )
 
     else
         ( model, Cmd.none )
