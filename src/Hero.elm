@@ -79,8 +79,8 @@ animateHero elapsed hero bullets =
 drawHero : Hero -> Svg msg
 drawHero hero =
     Svg.rect
-        [ SvgAttr.x <| String.fromInt (Tuple.first hero.pos)
-        , SvgAttr.y <| String.fromInt (Tuple.second hero.pos)
+        [ SvgAttr.x <| String.fromInt <| Tuple.first hero.pos
+        , SvgAttr.y <| String.fromInt <| Tuple.second hero.pos
         , SvgAttr.height <| String.fromInt heroHeight
         , SvgAttr.width <| String.fromInt heroWidth
         , SvgAttr.fill "blue"
@@ -90,30 +90,34 @@ drawHero hero =
 
 moveHero : Hero -> Hero
 moveHero hero =
+    let
+        ( x, y ) =
+            hero.pos
+    in
     case hero.heroDir of
         Left ->
-            { hero | pos = ( Tuple.first hero.pos - heroSpeed, Tuple.second hero.pos ) }
+            { hero | pos = ( x - heroSpeed, y ) }
 
         Right ->
-            { hero | pos = ( Tuple.first hero.pos + heroSpeed, Tuple.second hero.pos ) }
+            { hero | pos = ( x + heroSpeed, y ) }
 
         Up ->
-            { hero | pos = ( Tuple.first hero.pos, Tuple.second hero.pos - heroSpeed ) }
+            { hero | pos = ( x, y - heroSpeed ) }
 
         Down ->
-            { hero | pos = ( Tuple.first hero.pos, Tuple.second hero.pos + heroSpeed ) }
+            { hero | pos = ( x, y + heroSpeed ) }
 
         UpLeft ->
-            { hero | pos = ( Tuple.first hero.pos - round (heroSpeed / sqrt 2), Tuple.second hero.pos - round (heroSpeed / sqrt 2) ) }
+            { hero | pos = ( x - round (heroSpeed / sqrt 2), y - round (heroSpeed / sqrt 2) ) }
 
         UpRight ->
-            { hero | pos = ( Tuple.first hero.pos + round (heroSpeed / sqrt 2), Tuple.second hero.pos - round (heroSpeed / sqrt 2) ) }
+            { hero | pos = ( x + round (heroSpeed / sqrt 2), y - round (heroSpeed / sqrt 2) ) }
 
         DownLeft ->
-            { hero | pos = ( Tuple.first hero.pos - round (heroSpeed / sqrt 2), Tuple.second hero.pos + round (heroSpeed / sqrt 2) ) }
+            { hero | pos = ( x - round (heroSpeed / sqrt 2), y + round (heroSpeed / sqrt 2) ) }
 
         DownRight ->
-            { hero | pos = ( Tuple.first hero.pos + round (heroSpeed / sqrt 2), Tuple.second hero.pos + round (heroSpeed / sqrt 2) ) }
+            { hero | pos = ( x + round (heroSpeed / sqrt 2), y + round (heroSpeed / sqrt 2) ) }
 
         None ->
             hero
