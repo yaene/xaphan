@@ -1,4 +1,4 @@
-module Hero exposing (Hero, HeroBullet, animateHero, animateHeroBullets, drawHero, heroHeight, heroWidth, init, moveHero, startMove, startShooting)
+module Hero exposing (Hero, HeroBullet, animateHero, animateHeroBullets, drawHero, drawHeroBullets, heroHeight, heroWidth, init, moveHero, startMove, startShooting)
 
 import Dir exposing (Dir(..))
 import Field exposing (Pos, inBoundsX, moveBy)
@@ -8,8 +8,8 @@ import Svg.Attributes as SvgAttr
 
 
 type alias Hero =
-    { x : Int
-    , y : Int
+    { pos : Pos
+    , hp : Int
     , moveRight : Bool
     , moveLeft : Bool
     , moveUp : Bool
@@ -22,7 +22,7 @@ type alias Hero =
 
 
 type alias HeroBullet =
-    { pos : Pos
+    { posBullet : Pos
     , dx : Int
     , dy : Int
     }
@@ -50,6 +50,14 @@ heroHeight =
     120
 
 
+bulletWidth =
+    10
+
+
+bulletHeight =
+    20
+
+
 heroSpeed : number
 heroSpeed =
     15
@@ -57,7 +65,7 @@ heroSpeed =
 
 init : () -> Hero
 init _ =
-    Hero 500 800 False False False False False False 0 None
+    Hero ( 500, 800 ) 3 False False False False False False 0 None
 
 
 animateHero : Float -> Hero -> List HeroBullet -> ( Hero, List HeroBullet )
@@ -76,8 +84,8 @@ animateHero elapsed hero bullets =
 drawHero : Hero -> Svg msg
 drawHero hero =
     Svg.rect
-        [ SvgAttr.x <| String.fromInt hero.x
-        , SvgAttr.y <| String.fromInt hero.y
+        [ SvgAttr.x <| String.fromInt (Tuple.first hero.pos)
+        , SvgAttr.y <| String.fromInt (Tuple.second hero.pos)
         , SvgAttr.height <| String.fromInt heroHeight
         , SvgAttr.width <| String.fromInt heroWidth
         , SvgAttr.fill "blue"
@@ -89,28 +97,28 @@ moveHero : Hero -> Hero
 moveHero hero =
     case hero.heroDir of
         Left ->
-            { hero | x = hero.x - heroSpeed }
+            { hero | pos = ( Tuple.first hero.pos - heroSpeed, Tuple.second hero.pos ) }
 
         Right ->
-            { hero | x = hero.x + heroSpeed }
+            { hero | pos = ( Tuple.first hero.pos + heroSpeed, Tuple.second hero.pos ) }
 
         Up ->
-            { hero | y = hero.y - heroSpeed }
+            { hero | pos = ( Tuple.first hero.pos, Tuple.second hero.pos - heroSpeed ) }
 
         Down ->
-            { hero | y = hero.y + heroSpeed }
+            { hero | pos = ( Tuple.first hero.pos, Tuple.second hero.pos + heroSpeed ) }
 
         UpLeft ->
-            { hero | y = hero.y - round (heroSpeed / sqrt 2), x = hero.x - round (heroSpeed / sqrt 2) }
+            { hero | pos = ( Tuple.first hero.pos - round (heroSpeed / sqrt 2), Tuple.second hero.pos - round (heroSpeed / sqrt 2) ) }
 
         UpRight ->
-            { hero | y = hero.y - round (heroSpeed / sqrt 2), x = hero.x + round (heroSpeed / sqrt 2) }
+            { hero | pos = ( Tuple.first hero.pos + round (heroSpeed / sqrt 2), Tuple.second hero.pos - round (heroSpeed / sqrt 2) ) }
 
         DownLeft ->
-            { hero | y = hero.y + round (heroSpeed / sqrt 2), x = hero.x - round (heroSpeed / sqrt 2) }
+            { hero | pos = ( Tuple.first hero.pos - round (heroSpeed / sqrt 2), Tuple.second hero.pos + round (heroSpeed / sqrt 2) ) }
 
         DownRight ->
-            { hero | y = hero.y + round (heroSpeed / sqrt 2), x = hero.x + round (heroSpeed / sqrt 2) }
+            { hero | pos = ( Tuple.first hero.pos + round (heroSpeed / sqrt 2), Tuple.second hero.pos + round (heroSpeed / sqrt 2) ) }
 
         None ->
             hero
@@ -127,7 +135,7 @@ startShooting hero =
 
 shootBullet : Hero -> HeroBullet
 shootBullet hero =
-    HeroBullet (moveBy ( heroWidth // 2, heroHeight ) ( hero.x, hero.y )) 0 5
+    HeroBullet (moveBy ( heroWidth // 2, heroHeight ) hero.pos) 0 5
 
 
 animateShootBullet : Float -> Hero -> Hero
@@ -160,9 +168,9 @@ animateHeroBullets hero bullets =
 animateHeroBullet bullet =
     let
         ( x, y ) =
-            bullet.pos
+            bullet.posBullet
     in
-    { bullet | pos = ( x, y + bullet.dy ) }
+    { bullet | posBullet = ( x, y + bullet.dy ) }
 
 
 direction : Hero -> Dir
@@ -194,3 +202,24 @@ direction { moveLeft, moveRight, moveUp, moveDown } =
 
         _ ->
             None
+
+
+drawHeroBullets : List HeroBullet -> List (Svg Msg)
+drawHeroBullets enemyBullets =
+    enemyBullets |> List.map drawHeroBullet
+
+
+drawHeroBullet : HeroBullet -> Svg Msg
+drawHeroBullet bullet =
+    let
+        ( x, y ) =
+            bullet.posBullet
+    in
+    Svg.rect
+        [ SvgAttr.x <| String.fromInt x
+        , SvgAttr.y <| String.fromInt y
+        , SvgAttr.fill "green"
+        , SvgAttr.width <| String.fromInt bulletWidth
+        , SvgAttr.height <| String.fromInt bulletHeight
+        ]
+        []
