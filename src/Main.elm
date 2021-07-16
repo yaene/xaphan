@@ -42,7 +42,7 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model (Hero.init ()) [] [ Enemy ( 50, 50 ) 1 0 Right 0 False 0 False ] [] Playing, Cmd.none )
+    ( Model (Hero.init ()) [] [ Enemy ( 50, 50 ) 2 0 Right 0 False 0 False ] [] Playing, Cmd.none )
 
 
 view : Model -> Html.Html Msg
@@ -178,17 +178,17 @@ animate elapsed model =
 
             ( hero, heroBullets ) =
                 animateHero elapsed model.hero model.heroBullets
+
+            ( aliveEnemies, uncollidedBullets ) =
+                collideBulletsEnemies enemies heroBullets
         in
         ( { model
             | hero = hero
-            , heroBullets = heroBullets
-            , enemies = enemies
+            , heroBullets = uncollidedBullets
+            , enemies = aliveEnemies
             , enemyBullets = enemyBullets
             , state =
                 model
-                    -- the below 2 functions are NOT implemented
-                    |> cleanEnemy
-                    |> cleanBullets
                     |> newState
           }
         , cmd
@@ -208,15 +208,6 @@ cleanBullets : Model -> Model
 cleanBullets model =
     -- NOT implemented
     model
-
-
-reduceEnemyHealth : Enemy -> List HeroBullet -> Enemy
-reduceEnemyHealth enemy heroBullets =
-    if isEnemyHit enemy heroBullets then
-        { enemy | hp = enemy.hp - 1 }
-
-    else
-        enemy
 
 
 newState : Model -> State
