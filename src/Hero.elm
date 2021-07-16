@@ -1,4 +1,4 @@
-module Hero exposing (Hero, HeroBullet, animateHero, animateHeroBullets, drawHero, drawHeroBullets, heroHeight, heroWidth, init, moveHero, reduceHeroHP, shootBullet, startMove)
+module Hero exposing (Hero, HeroBullet, animateHero, animateHeroBullets, drawHero, drawHeroBullets, heroHeight, heroWidth, init, moveHero, shootBullet, startMove)
 
 import Dir exposing (Dir(..))
 import Field exposing (Pos, inBoundsX, moveBy)
@@ -9,7 +9,6 @@ import Svg.Attributes as SvgAttr
 
 type alias Hero =
     { pos : Pos
-    , hp : Int
     , moveRight : Bool
     , moveLeft : Bool
     , moveUp : Bool
@@ -62,7 +61,7 @@ heroSpeed =
 
 init : () -> Hero
 init _ =
-    Hero ( 500, 800 ) 3 False False False False None
+    Hero ( 500, 800 ) False False False False None
 
 
 animateHero : Float -> Hero -> List HeroBullet -> ( Hero, List HeroBullet )
@@ -75,11 +74,6 @@ animateHero elapsed hero bullets =
         |> moveHero
     , animatedbullets
     )
-
-
-reduceHeroHP : Hero -> Hero
-reduceHeroHP hero =
-    { hero | hp = hero.hp - 1 }
 
 
 drawHero : Hero -> Svg msg

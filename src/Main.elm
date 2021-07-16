@@ -186,7 +186,6 @@ animate elapsed model =
             , enemyBullets = enemyBullets
             , state =
                 model
-                    |> reduceHeroHealth
                     -- the below 2 functions are NOT implemented
                     |> cleanEnemy
                     |> cleanBullets
@@ -211,15 +210,6 @@ cleanBullets model =
     model
 
 
-reduceHeroHealth : Model -> Model
-reduceHeroHealth model =
-    if isHeroHit model.hero model.enemyBullets then
-        { model | hero = model.hero |> reduceHeroHP }
-
-    else
-        model
-
-
 reduceEnemyHealth : Enemy -> List HeroBullet -> Enemy
 reduceEnemyHealth enemy heroBullets =
     if isEnemyHit enemy heroBullets then
@@ -231,11 +221,7 @@ reduceEnemyHealth enemy heroBullets =
 
 newState : Model -> State
 newState model =
-    let
-        hp =
-            model.hero.hp
-    in
-    if hp <= 0 then
+    if isHeroHit model.hero model.enemyBullets then
         GameOver
 
     else
