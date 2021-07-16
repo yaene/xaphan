@@ -198,18 +198,6 @@ animate elapsed model =
         ( model, Cmd.none )
 
 
-cleanEnemy : Model -> Model
-cleanEnemy model =
-    -- NOT implemented, encountered problems on List.map
-    model
-
-
-cleanBullets : Model -> Model
-cleanBullets model =
-    -- NOT implemented
-    model
-
-
 newState : Model -> State
 newState model =
     if isHeroHit model.hero model.enemyBullets then
