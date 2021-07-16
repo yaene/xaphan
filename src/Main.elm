@@ -151,7 +151,7 @@ update msg model =
             )
 
         HeroShootBullet on ->
-            ( { model | hero = Hero.startShooting hero }
+            ( { model | hero = { hero | isShootKeyPressed = on } }
             , Cmd.none
             )
 
@@ -199,7 +199,7 @@ cleanEnemy : Model -> Model
 cleanEnemy model =
     -- NOT implemented, encountered problems on List.map
     model
- 
+
 
 cleanBullets : Model -> Model
 cleanBullets model =

@@ -1,4 +1,4 @@
-module Hero exposing (Hero, HeroBullet, animateHero, animateHeroBullets, drawHero, drawHeroBullets, heroHeight, heroWidth, init, moveHero, reduceHeroHP, startMove, startShooting)
+module Hero exposing (Hero, HeroBullet, animateHero, animateHeroBullets, drawHero, drawHeroBullets, heroHeight, heroWidth, init, moveHero, reduceHeroHP, startMove)
 
 import Dir exposing (Dir(..))
 import Field exposing (Pos, inBoundsX, moveBy)
@@ -134,10 +134,6 @@ startMove hero =
     { hero | heroDir = direction hero }
 
 
-startShooting hero =
-    { hero | isShootKeyPressed = True }
-
-
 shootBullet : Hero -> HeroBullet
 shootBullet hero =
     HeroBullet (moveBy ( heroWidth // 2, -bulletHeight ) hero.pos) 0 -5
@@ -165,9 +161,17 @@ animateShootBullet elapsed hero =
 
 animateHeroBullets : Hero -> List HeroBullet -> List HeroBullet
 animateHeroBullets hero bullets =
+    let
+        newBullets =
+            if hero.shootBullet then
+                [ shootBullet hero ]
+
+            else
+                []
+    in
     bullets
         |> List.map animateHeroBullet
-        |> (++) [ shootBullet hero ]
+        |> (++) newBullets
 
 
 animateHeroBullet bullet =
