@@ -1,6 +1,7 @@
 module Collision exposing (collideBulletsEnemies, isHeroHit)
 
-import Enemy exposing (Enemy, EnemyBullet, bulletHeight, bulletWidth)
+import Enemy exposing (Enemy, EnemyBullet, enemyHeight, enemyWidth)
+import Field exposing (Pos)
 import Hero exposing (Hero, HeroBullet, heroHeight, heroWidth)
 import List exposing (map)
 
@@ -12,21 +13,13 @@ isHeroHit hero bullets =
 
 isBulletCollidingHero : Hero -> EnemyBullet -> Bool
 isBulletCollidingHero { pos } { posBullet } =
-    let
-        ( bx1, by1 ) =
-            posBullet
+    isColliding ( pos, ( enemyWidth, enemyHeight ) ) ( posBullet, ( Enemy.bulletWidth, Enemy.bulletHeight ) )
 
-        ( bx2, by2 ) =
-            ( bx1 + bulletWidth, by1 + bulletHeight )
 
-        ( x, y ) =
-            pos
-
-        ( x2, y2 ) =
-            ( x + heroWidth, y + heroHeight )
-    in
-    (x < bx2 && x2 > bx1)
-        && (y < by2 && y2 > by1)
+isColliding : ( Pos, ( Int, Int ) ) -> ( Pos, ( Int, Int ) ) -> Bool
+isColliding ( ( x1, y1 ), ( w1, h1 ) ) ( ( x2, y2 ), ( w2, h2 ) ) =
+    (x1 < x2 + w2 && x1 + w1 > x2)
+        && (y1 < y2 + h2 && y1 + h1 > y2)
 
 
 isEnemyHit : Enemy -> List HeroBullet -> Bool
@@ -36,21 +29,7 @@ isEnemyHit enemy bullets =
 
 isBulletCollidingEnemy : Enemy -> HeroBullet -> Bool
 isBulletCollidingEnemy { pos } { posBullet } =
-    let
-        ( bx1, by1 ) =
-            posBullet
-
-        ( bx2, by2 ) =
-            ( bx1 + bulletWidth, by1 + bulletHeight )
-
-        ( x, y ) =
-            pos
-
-        ( x2, y2 ) =
-            ( x + heroWidth, y + heroHeight )
-    in
-    (x < bx2 && x2 > bx1)
-        && (y < by2 && y2 > by1)
+    isColliding ( pos, ( enemyWidth, enemyHeight ) ) ( posBullet, ( Hero.bulletWidth, Hero.bulletHeight ) )
 
 
 collideBulletsEnemies : List Enemy -> List HeroBullet -> ( List Enemy, List HeroBullet )

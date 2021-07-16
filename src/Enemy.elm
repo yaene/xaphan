@@ -1,4 +1,4 @@
-module Enemy exposing (Enemy, EnemyBullet, animateEnemies, bulletHeight, bulletWidth, changeEnemyDir, drawBullets, drawEnemies)
+module Enemy exposing (Enemy, EnemyBullet, animateEnemies, bulletHeight, bulletWidth, changeEnemyDir, drawBullets, drawEnemies, enemyHeight, enemyWidth)
 
 import Dir exposing (Dir(..))
 import Field exposing (Pos, inBoundsX, moveBy)
