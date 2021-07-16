@@ -183,6 +183,7 @@ animate elapsed model =
             , state =
                 model
                     |> reduceHeroHealth
+                    -- the below 2 functions are NOT implemented
                     |> cleanEnemy
                     |> cleanBullets
                     |> newState
@@ -196,13 +197,13 @@ animate elapsed model =
 
 cleanEnemy : Model -> Model
 cleanEnemy model =
-    -- not yet implemented, encountered problems on List.map
+    -- NOT implemented, encountered problems on List.map
     model
  
 
 cleanBullets : Model -> Model
 cleanBullets model =
-    -- not yet implemented
+    -- NOT implemented
     model
 
 

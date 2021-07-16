@@ -31,7 +31,7 @@ isBulletCollidingHero { pos } { posBullet } =
 isEnemyHit : Enemy -> List HeroBullet -> Bool
 isEnemyHit enemy bullets =
     bullets |> List.any (isBulletCollidingEnemy enemy)
-
+ 
 
 isBulletCollidingEnemy : Enemy -> HeroBullet -> Bool
 isBulletCollidingEnemy { pos } { posBullet } =

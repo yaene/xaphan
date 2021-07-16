@@ -26,7 +26,7 @@ type alias HeroBullet =
     , dx : Int
     , dy : Int
     }
-
+ 
 
 type Dir
     = Up
