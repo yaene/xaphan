@@ -198,7 +198,7 @@ cleanEnemy : Model -> Model
 cleanEnemy model =
     -- not yet implemented, encountered problems on List.map
     model
-
+ 
 
 cleanBullets : Model -> Model
 cleanBullets model =
