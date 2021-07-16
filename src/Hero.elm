@@ -140,7 +140,7 @@ startShooting hero =
 
 shootBullet : Hero -> HeroBullet
 shootBullet hero =
-    HeroBullet (moveBy ( heroWidth // 2, heroHeight ) hero.pos) 0 -5
+    HeroBullet (moveBy ( heroWidth // 2, -bulletHeight ) hero.pos) 0 -5
 
 
 animateShootBullet : Float -> Hero -> Hero
