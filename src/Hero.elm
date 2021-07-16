@@ -1,4 +1,4 @@
-module Hero exposing (Hero, HeroBullet, animateHero, animateHeroBullets, drawHero, drawHeroBullets, heroHeight, heroWidth, init, moveHero, reduceHeroHP, startMove)
+module Hero exposing (Hero, HeroBullet, animateHero, animateHeroBullets, drawHero, drawHeroBullets, heroHeight, heroWidth, init, moveHero, reduceHeroHP, shootBullet, startMove)
 
 import Dir exposing (Dir(..))
 import Field exposing (Pos, inBoundsX, moveBy)
@@ -14,9 +14,6 @@ type alias Hero =
     , moveLeft : Bool
     , moveUp : Bool
     , moveDown : Bool
-    , isShootKeyPressed : Bool
-    , shootBullet : Bool
-    , shootBulletElapsed : Float
     , heroDir : Dir
     }
 
@@ -65,7 +62,7 @@ heroSpeed =
 
 init : () -> Hero
 init _ =
-    Hero ( 500, 800 ) 3 False False False False False False 0 None
+    Hero ( 500, 800 ) 3 False False False False None
 
 
 animateHero : Float -> Hero -> List HeroBullet -> ( Hero, List HeroBullet )
@@ -76,7 +73,6 @@ animateHero elapsed hero bullets =
     in
     ( hero
         |> moveHero
-        |> animateShootBullet elapsed
     , animatedbullets
     )
 
@@ -139,39 +135,10 @@ shootBullet hero =
     HeroBullet (moveBy ( heroWidth // 2, -bulletHeight ) hero.pos) 0 -5
 
 
-animateShootBullet : Float -> Hero -> Hero
-animateShootBullet elapsed hero =
-    let
-        shootBulletElapsed =
-            hero.shootBulletElapsed + elapsed
-
-        interval =
-            1000
-    in
-    if hero.isShootKeyPressed == True then
-        if shootBulletElapsed > interval then
-            { hero | shootBulletElapsed = shootBulletElapsed - interval, shootBullet = True }
-
-        else
-            { hero | shootBulletElapsed = shootBulletElapsed, shootBullet = False }
-
-    else
-        hero
-
-
 animateHeroBullets : Hero -> List HeroBullet -> List HeroBullet
 animateHeroBullets hero bullets =
-    let
-        newBullets =
-            if hero.shootBullet then
-                [ shootBullet hero ]
-
-            else
-                []
-    in
     bullets
         |> List.map animateHeroBullet
-        |> (++) newBullets
 
 
 animateHeroBullet bullet =

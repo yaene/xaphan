@@ -117,7 +117,11 @@ key on keycode =
 
         -- key: z
         90 ->
-            HeroShootBullet on
+            if on then
+                HeroShootBullet
+
+            else
+                Noop
 
         _ ->
             Noop
@@ -150,8 +154,8 @@ update msg model =
             , Cmd.none
             )
 
-        HeroShootBullet on ->
-            ( { model | hero = { hero | isShootKeyPressed = on } }
+        HeroShootBullet ->
+            ( { model | heroBullets = shootBullet hero :: model.heroBullets }
             , Cmd.none
             )
 

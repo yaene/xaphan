@@ -9,6 +9,6 @@ type Msg
     | MoveHeroDown Bool
     | MoveHeroLeft Bool
     | MoveHeroRight Bool
-    | HeroShootBullet Bool
+    | HeroShootBullet
     | ChangeEnemyDir ( Int, Dir )
     | Noop
