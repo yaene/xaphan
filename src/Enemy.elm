@@ -1,4 +1,4 @@
-module Enemy exposing (Enemy, EnemyBullet, animateEnemies, bulletHeight, bulletWidth, changeEnemyDir, drawBullets, drawEnemies)
+module Enemy exposing (Enemy, EnemyBullet, animateEnemies, bulletHeight, bulletWidth, changeEnemyDir, drawBullets, drawEnemies, enemyHeight, enemyWidth)
 
 import Dir exposing (Dir(..))
 import Field exposing (Pos, inBoundsX, moveBy)
@@ -36,7 +36,7 @@ type alias Enemy =
 
 
 type alias EnemyBullet =
-    { pos : Pos, dx : Int, dy : Int }
+    { posBullet : Pos, dx : Int, dy : Int }
 
 
 drawEnemies : List Enemy -> List (Svg Msg)
@@ -53,7 +53,7 @@ drawBullet : EnemyBullet -> Svg Msg
 drawBullet bullet =
     let
         ( x, y ) =
-            bullet.pos
+            bullet.posBullet
     in
     Svg.rect
         [ SvgAttr.x <| String.fromInt x
@@ -101,9 +101,9 @@ shootBullet shooter =
 animateEnemyBullet bullet =
     let
         ( x, y ) =
-            bullet.pos
+            bullet.posBullet
     in
-    { bullet | pos = ( x, y + bullet.dy ) }
+    { bullet | posBullet = ( x, y + bullet.dy ) }
 
 
 changeEnemyDir : Int -> Dir -> List Enemy -> List Enemy

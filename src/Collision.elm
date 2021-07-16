@@ -1,25 +1,59 @@
-module Collision exposing (isHeroHit)
+module Collision exposing (collideBulletsEnemies, isHeroHit)
 
-import Enemy exposing (EnemyBullet, bulletHeight, bulletWidth)
-import Hero exposing (Hero, heroHeight, heroWidth)
+import Enemy exposing (Enemy, EnemyBullet, enemyHeight, enemyWidth)
+import Field exposing (Pos)
+import Hero exposing (Hero, HeroBullet, heroHeight, heroWidth)
+import List exposing (map)
 
 
 isHeroHit : Hero -> List EnemyBullet -> Bool
 isHeroHit hero bullets =
-    bullets |> List.any (isBulletColliding hero)
+    bullets |> List.any (isBulletCollidingHero hero)
 
 
-isBulletColliding : Hero -> EnemyBullet -> Bool
-isBulletColliding { x, y } { pos } =
+isBulletCollidingHero : Hero -> EnemyBullet -> Bool
+isBulletCollidingHero { pos } { posBullet } =
+    isColliding ( pos, ( enemyWidth, enemyHeight ) ) ( posBullet, ( Enemy.bulletWidth, Enemy.bulletHeight ) )
+
+
+isColliding : ( Pos, ( Int, Int ) ) -> ( Pos, ( Int, Int ) ) -> Bool
+isColliding ( ( x1, y1 ), ( w1, h1 ) ) ( ( x2, y2 ), ( w2, h2 ) ) =
+    (x1 < x2 + w2 && x1 + w1 > x2)
+        && (y1 < y2 + h2 && y1 + h1 > y2)
+
+
+isEnemyHit : Enemy -> List HeroBullet -> Bool
+isEnemyHit enemy bullets =
+    bullets |> List.any (isBulletCollidingEnemy enemy)
+
+
+isBulletCollidingEnemy : Enemy -> HeroBullet -> Bool
+isBulletCollidingEnemy { pos } { posBullet } =
+    isColliding ( pos, ( enemyWidth, enemyHeight ) ) ( posBullet, ( Hero.bulletWidth, Hero.bulletHeight ) )
+
+
+collideBulletsEnemies : List Enemy -> List HeroBullet -> ( List Enemy, List HeroBullet )
+collideBulletsEnemies enemies heroBullets =
     let
-        ( bx1, by1 ) =
-            pos
+        aliveEnemies =
+            enemies
+                |> List.map (\enemy -> reduceEnemyHealth enemy heroBullets)
+                |> List.filter (.hp >> (<) 0)
 
-        ( bx2, by2 ) =
-            ( bx1 + bulletWidth, by1 + bulletHeight )
-
-        ( x2, y2 ) =
-            ( x + heroWidth, y + heroHeight )
+        uncollidedBullets =
+            heroBullets
+                |> List.filter
+                    (\bullet ->
+                        List.all (not << (\enemy -> isBulletCollidingEnemy enemy bullet)) enemies
+                    )
     in
-    (x < bx2 && x2 > bx1)
-        && (y < by2 && y2 > by1)
+    ( aliveEnemies, uncollidedBullets )
+
+
+reduceEnemyHealth : Enemy -> List HeroBullet -> Enemy
+reduceEnemyHealth enemy heroBullets =
+    if isEnemyHit enemy heroBullets then
+        { enemy | hp = enemy.hp - 1 }
+
+    else
+        enemy
