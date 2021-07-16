@@ -1,4 +1,4 @@
-module Collision exposing (isEnemyHit, isHeroHit)
+module Collision exposing (..)
 
 import Enemy exposing (Enemy, EnemyBullet, bulletHeight, bulletWidth)
 import Hero exposing (Hero, HeroBullet, heroHeight, heroWidth)

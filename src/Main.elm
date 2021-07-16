@@ -2,7 +2,7 @@ module Main exposing (main)
 
 import Browser
 import Browser.Events exposing (onAnimationFrameDelta, onKeyDown, onKeyUp)
-import Collision exposing (isEnemyHit, isHeroHit)
+import Collision exposing (..)
 import Dir exposing (Dir(..))
 import Enemy exposing (Enemy, EnemyBullet, animateEnemies, changeEnemyDir, drawBullets, drawEnemies)
 import Field exposing (Pos)
@@ -42,7 +42,7 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model (Hero.init ()) [] [ Enemy ( 50, 50 ) 3 0 Right 0 False 0 False ] [] Playing, Cmd.none )
+    ( Model (Hero.init ()) [] [ Enemy ( 50, 50 ) 1 0 Right 0 False 0 False ] [] Playing, Cmd.none )
 
 
 view : Model -> Html.Html Msg
@@ -175,15 +175,62 @@ animate elapsed model =
             ( hero, heroBullets ) =
                 animateHero elapsed model.hero model.heroBullets
         in
-        ( { model | hero = hero, heroBullets = heroBullets, enemies = enemies, enemyBullets = enemyBullets, state = newState model }, cmd )
+        ( { model
+            | hero = hero
+            , heroBullets = heroBullets
+            , enemies = enemies
+            , enemyBullets = enemyBullets
+            , state =
+                model
+                    |> reduceHeroHealth
+                    |> cleanEnemy
+                    |> cleanBullets
+                    |> newState
+          }
+        , cmd
+        )
 
     else
         ( model, Cmd.none )
 
 
+cleanEnemy : Model -> Model
+cleanEnemy model =
+    -- not yet implemented, encountered problems on List.map
+    model
+
+
+cleanBullets : Model -> Model
+cleanBullets model =
+    -- not yet implemented
+    model
+
+
+reduceHeroHealth : Model -> Model
+reduceHeroHealth model =
+    if isHeroHit model.hero model.enemyBullets then
+        { model | hero = model.hero |> reduceHeroHP }
+
+    else
+        model
+
+
+reduceEnemyHealth : Enemy -> List HeroBullet -> Enemy
+reduceEnemyHealth enemy heroBullets =
+    if isEnemyHit enemy heroBullets then
+        { enemy | hp = enemy.hp - 1 }
+
+    else
+        enemy
+
+
 newState : Model -> State
 newState model =
-    if isHeroHit model.hero model.enemyBullets then
+    let
+        hp =
+            model.hero.hp
+    in
+    if hp <= 0 then
         GameOver
 
     else

@@ -1,4 +1,4 @@
-module Hero exposing (Hero, HeroBullet, animateHero, animateHeroBullets, drawHero, drawHeroBullets, heroHeight, heroWidth, init, moveHero, startMove, startShooting)
+module Hero exposing (Hero, HeroBullet, animateHero, animateHeroBullets, drawHero, drawHeroBullets, heroHeight, heroWidth, init, moveHero, reduceHeroHP, startMove, startShooting)
 
 import Dir exposing (Dir(..))
 import Field exposing (Pos, inBoundsX, moveBy)
@@ -79,6 +79,11 @@ animateHero elapsed hero bullets =
         |> animateShootBullet elapsed
     , animatedbullets
     )
+
+
+reduceHeroHP : Hero -> Hero
+reduceHeroHP hero =
+    { hero | hp = hero.hp - 1 }
 
 
 drawHero : Hero -> Svg msg
