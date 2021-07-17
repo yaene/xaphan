@@ -2,7 +2,7 @@ module Main exposing (main)
 
 import Browser
 import Browser.Events exposing (onAnimationFrameDelta, onKeyDown, onKeyUp)
-import Collision exposing (collideBulletsEnemies, isHeroHit)
+import Collision exposing (collideBulletsEnemies, collideBulletsHero, isHeroHit)
 import Dir exposing (Dir(..))
 import Enemy exposing (Enemy, EnemyBullet, animateEnemies, changeEnemyDir, drawBullets, drawEnemies)
 import Field exposing (Pos)
@@ -48,12 +48,11 @@ init _ =
 view : Model -> Html.Html Msg
 view model =
     Html.div
-        [ HtmlAttr.style "height" "100%"
-        , HtmlAttr.style "display" "flex"
+        [ HtmlAttr.style "display" "flex"
         , HtmlAttr.style "justify-content" "center"
         ]
         [ Html.div
-            [ HtmlAttr.style "width" "50%"
+            [ HtmlAttr.style "width" "99vh"
             , HtmlAttr.style "background-color" "gray"
             ]
             [ Svg.svg
@@ -181,12 +180,15 @@ animate elapsed model =
 
             ( aliveEnemies, uncollidedBullets ) =
                 collideBulletsEnemies enemies heroBullets
+
+            ( collidedHero, uncollidedEnemyBullets ) =
+                collideBulletsHero hero enemyBullets
         in
         ( { model
-            | hero = hero
+            | hero = collidedHero
             , heroBullets = uncollidedBullets
             , enemies = aliveEnemies
-            , enemyBullets = enemyBullets
+            , enemyBullets = uncollidedEnemyBullets
             , state =
                 model
                     |> newState
@@ -200,7 +202,7 @@ animate elapsed model =
 
 newState : Model -> State
 newState model =
-    if isHeroHit model.hero model.enemyBullets then
+    if model.hero.hp <= 0 then
         GameOver
 
     else
