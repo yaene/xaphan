@@ -48,12 +48,11 @@ init _ =
 view : Model -> Html.Html Msg
 view model =
     Html.div
-        [ HtmlAttr.style "height" "100%"
-        , HtmlAttr.style "display" "flex"
+        [ HtmlAttr.style "display" "flex"
         , HtmlAttr.style "justify-content" "center"
         ]
         [ Html.div
-            [ HtmlAttr.style "width" "50%"
+            [ HtmlAttr.style "width" "99vh"
             , HtmlAttr.style "background-color" "gray"
             ]
             [ Svg.svg
