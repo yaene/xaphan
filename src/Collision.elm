@@ -1,4 +1,4 @@
-module Collision exposing (collideBulletsEnemies, isHeroHit)
+module Collision exposing (collideBulletsEnemies, collideBulletsHero, isHeroHit)
 
 import Enemy exposing (Enemy, EnemyBullet, enemyHeight, enemyWidth)
 import Field exposing (Pos)
@@ -48,6 +48,15 @@ collideBulletsEnemies enemies heroBullets =
                     )
     in
     ( aliveEnemies, uncollidedBullets )
+
+
+collideBulletsHero : Hero -> List EnemyBullet -> ( Hero, List EnemyBullet )
+collideBulletsHero hero bullets =
+    if isHeroHit hero bullets then
+        ( { hero | hp = hero.hp - 1 }, List.filter (not << isBulletCollidingHero hero) bullets )
+
+    else
+        ( hero, bullets )
 
 
 reduceEnemyHealth : Enemy -> List HeroBullet -> Enemy

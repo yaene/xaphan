@@ -2,7 +2,7 @@ module Main exposing (main)
 
 import Browser
 import Browser.Events exposing (onAnimationFrameDelta, onKeyDown, onKeyUp)
-import Collision exposing (collideBulletsEnemies, isHeroHit)
+import Collision exposing (collideBulletsEnemies, collideBulletsHero, isHeroHit)
 import Dir exposing (Dir(..))
 import Enemy exposing (Enemy, EnemyBullet, animateEnemies, changeEnemyDir, drawBullets, drawEnemies)
 import Field exposing (Pos)
@@ -181,12 +181,15 @@ animate elapsed model =
 
             ( aliveEnemies, uncollidedBullets ) =
                 collideBulletsEnemies enemies heroBullets
+
+            ( collidedHero, uncollidedEnemyBullets ) =
+                collideBulletsHero hero enemyBullets
         in
         ( { model
-            | hero = hero
+            | hero = collidedHero
             , heroBullets = uncollidedBullets
             , enemies = aliveEnemies
-            , enemyBullets = enemyBullets
+            , enemyBullets = uncollidedEnemyBullets
             , state =
                 model
                     |> newState
@@ -200,7 +203,7 @@ animate elapsed model =
 
 newState : Model -> State
 newState model =
-    if isHeroHit model.hero model.enemyBullets then
+    if model.hero.hp <= 0 then
         GameOver
 
     else

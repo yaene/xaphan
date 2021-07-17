@@ -9,6 +9,7 @@ import Svg.Attributes as SvgAttr
 
 type alias Hero =
     { pos : Pos
+    , hp : Int
     , moveRight : Bool
     , moveLeft : Bool
     , moveUp : Bool
@@ -61,7 +62,7 @@ heroSpeed =
 
 init : () -> Hero
 init _ =
-    Hero ( 500, 800 ) False False False False None
+    Hero ( 500, 800 ) 3 False False False False None
 
 
 animateHero : Float -> Hero -> List HeroBullet -> ( Hero, List HeroBullet )
