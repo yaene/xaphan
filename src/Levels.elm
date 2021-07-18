@@ -1,13 +1,15 @@
-module Levels exposing (Level(..), loadLevel)
+module Levels exposing (Level, drawClearedLevel, loadLevel)
 
 import Animation exposing (Animation)
 import Dir exposing (Dir(..))
 import Enemy exposing (Enemy)
+import Html exposing (Html, button, text)
+import Html.Events exposing (onClick)
+import Messages exposing (Msg(..))
 
 
-type Level
-    = Level1
-    | Level2
+type alias Level =
+    Int
 
 
 type alias LevelData =
@@ -17,10 +19,23 @@ type alias LevelData =
 loadLevel : Level -> LevelData
 loadLevel level =
     case level of
-        Level1 ->
+        1 ->
             [ Enemy ( 50, 50 ) 2 0 Right (Animation 0 1500 False True) (Animation 0 1000 False True) ]
 
-        Level2 ->
+        2 ->
             [ Enemy ( 50, 50 ) 5 0 Right (Animation 0 1500 False True) (Animation 0 800 False True)
             , Enemy ( 400, 200 ) 5 0 Left (Animation 0 1500 False True) (Animation 0 1000 False True)
             ]
+
+        _ ->
+            []
+
+
+drawClearedLevel : Level -> List (Html Msg)
+drawClearedLevel level =
+    case level of
+        2 ->
+            [ text "You won :-)" ]
+
+        _ ->
+            [ button [ onClick <| NextLevel (level + 1) ] [ text "Next Level" ] ]
