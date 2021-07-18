@@ -12,6 +12,7 @@ import Html
 import Html.Attributes as HtmlAttr
 import Html.Events exposing (keyCode)
 import Json.Decode
+import Levels exposing (Level(..), loadLevel)
 import Messages exposing (Msg(..))
 import Svg exposing (Svg, rect)
 import Svg.Attributes as SvgAttr
@@ -43,7 +44,7 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model (Hero.init ()) [] [ Enemy ( 50, 50 ) 2 0 Right (Animation 0 1500 False True) (Animation 0 1000 False True) ] [] Playing, Cmd.none )
+    ( Model (Hero.init ()) [] (loadLevel Level1) [] Playing, Cmd.none )
 
 
 view : Model -> Html.Html Msg
