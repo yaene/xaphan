@@ -23,8 +23,8 @@ type alias Model =
     , heroBullets : List HeroBullet
     , enemies : List Enemy
     , enemyBullets : List EnemyBullet
-    , state : State
     , level : Level
+    , state : State
     }
 
 
@@ -46,7 +46,7 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model (Hero.init ()) [] (loadLevel 1) [] Playing 1, Cmd.none )
+    ( Model (Hero.init ()) [] (loadLevel 1) [] 1 Playing, Cmd.none )
 
 
 view : Model -> Html.Html Msg
@@ -181,7 +181,11 @@ update msg model =
             ( { model | enemies = changeEnemyDir index dir model.enemies }, Cmd.none )
 
         NextLevel level ->
-            ( { model | enemies = loadLevel level, state = Playing, level = level }, Cmd.none )
+            let
+                ( newModel, _ ) =
+                    init ()
+            in
+            ( { newModel | enemies = loadLevel level, state = Playing, level = level }, Cmd.none )
 
         Noop ->
             ( model, Cmd.none )
