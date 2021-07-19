@@ -11,6 +11,7 @@ module Enemy exposing
     , enemyHeight
     , enemyWidth
     , newBasicEnemy
+    , newSunEnemy
     )
 
 import Animation exposing (Animation, newAnimation, updateAnimation)
@@ -44,6 +45,7 @@ type alias Enemy =
     , dir : Dir
     , changeDirAnimation : Animation
     , shootBulletAnimation : Animation
+    , shootBulletFunc : Pos -> List EnemyBullet
     }
 
 
@@ -53,7 +55,12 @@ type alias EnemyBullet =
 
 newBasicEnemy : Pos -> Dir -> Enemy
 newBasicEnemy pos dir =
-    Enemy pos 5 dir (newAnimation 1500) (newAnimation 1000)
+    Enemy pos 5 dir (newAnimation 1500) (newAnimation 1000) shootBullet
+
+
+newSunEnemy : Pos -> Dir -> Enemy
+newSunEnemy pos dir =
+    Enemy pos 5 dir (newAnimation 1500) (newAnimation 1000) shootSunBullets
 
 
 drawEnemies : List Enemy -> List (Svg Msg)
@@ -133,9 +140,20 @@ animateEnemyBullets model =
     { model | enemyBullets = newBullets }
 
 
-shootBullet : Enemy -> EnemyBullet
-shootBullet shooter =
-    EnemyBullet (moveBy ( round <| enemyWidth / 2, enemyHeight ) shooter.pos) 0 5
+shootSunBullets : Pos -> List EnemyBullet
+shootSunBullets shooterPos =
+    List.range 0 8
+        |> List.map
+            (\i ->
+                EnemyBullet (moveBy ( round <| enemyWidth / 2, round <| enemyHeight / 2 ) shooterPos)
+                    (round <| (15 * cos ((i |> toFloat) * pi / 4)))
+                    (round <| (15 * sin ((i |> toFloat) * pi / 4)))
+            )
+
+
+shootBullet : Pos -> List EnemyBullet
+shootBullet shooterPos =
+    [ EnemyBullet (moveBy ( round <| enemyWidth / 2, enemyHeight ) shooterPos) 0 5 ]
 
 
 animateEnemyBullet : EnemyBullet -> EnemyBullet
@@ -144,7 +162,7 @@ animateEnemyBullet bullet =
         ( x, y ) =
             bullet.posBullet
     in
-    { bullet | posBullet = ( x, y + bullet.dy ) }
+    { bullet | posBullet = ( x + bullet.dx, y + bullet.dy ) }
 
 
 changeEnemyDir : Int -> Dir -> List Enemy -> List Enemy
@@ -175,7 +193,7 @@ animateShootBullet elapsed enemy =
 
         bullets =
             if newAnimation.shouldTrigger then
-                [ shootBullet enemy ]
+                enemy.shootBulletFunc enemy.pos
 
             else
                 []
