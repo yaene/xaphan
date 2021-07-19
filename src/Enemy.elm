@@ -10,6 +10,7 @@ module Enemy exposing
     , drawEnemies
     , enemyHeight
     , enemyWidth
+    , newBasicEnemy
     )
 
 import Animation exposing (Animation, updateAnimation)
@@ -49,6 +50,11 @@ type alias Enemy =
 
 type alias EnemyBullet =
     { posBullet : Pos, dx : Int, dy : Int }
+
+
+newBasicEnemy : Pos -> Dir -> Enemy
+newBasicEnemy pos dir =
+    Enemy pos 5 0 dir (Animation 0 1500 False True) (Animation 0 1000 False True)
 
 
 drawEnemies : List Enemy -> List (Svg Msg)
