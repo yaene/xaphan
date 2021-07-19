@@ -41,7 +41,6 @@ bulletHeight =
 type alias Enemy =
     { pos : Pos
     , hp : Int
-    , animationElapsed : Float
     , dir : Dir
     , changeDirAnimation : Animation
     , shootBulletAnimation : Animation
@@ -54,7 +53,7 @@ type alias EnemyBullet =
 
 newBasicEnemy : Pos -> Dir -> Enemy
 newBasicEnemy pos dir =
-    Enemy pos 5 0 dir (newAnimation 1500) (newAnimation 1000)
+    Enemy pos 5 dir (newAnimation 1500) (newAnimation 1000)
 
 
 drawEnemies : List Enemy -> List (Svg Msg)
