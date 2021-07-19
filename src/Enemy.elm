@@ -1,5 +1,19 @@
-module Enemy exposing (Enemy, EnemyBullet, animateEnemies, bulletHeight, bulletWidth, changeEnemyDir, drawBullets, drawEnemies, enemyHeight, enemyWidth)
+module Enemy exposing
+    ( Enemy
+    , EnemyBullet
+    , animateEnemies
+    , bulletHeight
+    , bulletWidth
+    , changeDirCmds
+    , changeEnemyDir
+    , drawBullets
+    , drawEnemies
+    , enemyHeight
+    , enemyWidth
+    )
 
+import Animation exposing (Animation, updateAnimation)
+import Dict exposing (update)
 import Dir exposing (Dir(..))
 import Field exposing (Pos, inBoundsX, moveBy)
 import Messages exposing (Msg(..))
@@ -28,10 +42,8 @@ type alias Enemy =
     , hp : Int
     , animationElapsed : Float
     , dir : Dir
-    , changeDirElapsed : Float
-    , changeDir : Bool
-    , shootBulletElapsed : Float
-    , shootBullet : Bool
+    , changeDirAnimation : Animation
+    , shootBulletAnimation : Animation
     }
 
 
@@ -65,32 +77,55 @@ drawBullet bullet =
         []
 
 
-animateEnemies : Float -> ( List Enemy, List EnemyBullet ) -> ( List Enemy, List EnemyBullet, Cmd Msg )
-animateEnemies elapsed ( enemies, enemyBullets ) =
+animateEnemies :
+    Float
+    -> { a | enemies : List Enemy, enemyBullets : List EnemyBullet }
+    -> { a | enemies : List Enemy, enemyBullets : List EnemyBullet }
+animateEnemies elapsed model =
+    model
+        |> animateEnemies_ elapsed
+        |> animateEnemyBullets
+
+
+changeDirCmds : Float -> { a | enemies : List Enemy } -> ( { a | enemies : List Enemy }, Cmd Msg )
+changeDirCmds elapsed ({ enemies } as model) =
     let
         newEnemies =
-            enemies |> List.map (animateEnemy elapsed)
+            enemies |> List.map (animateDirChange elapsed)
 
-        -- find enemies that should change direction and their index
         changeDirEnemies =
             newEnemies
                 |> List.indexedMap Tuple.pair
-                |> List.filter (Tuple.second >> .changeDir)
-
-        shootBulletEnemies =
-            newEnemies |> List.filter .shootBullet
+                |> List.filter (Tuple.second >> .changeDirAnimation >> .shouldTrigger)
     in
-    ( newEnemies
-    , animateEnemyBullets shootBulletEnemies enemyBullets
-    , Dir.generateRandomDirs changeDirEnemies ChangeEnemyDir
-    )
+    ( { model | enemies = newEnemies }, Dir.generateRandomDirs changeDirEnemies ChangeEnemyDir )
 
 
-animateEnemyBullets : List Enemy -> List EnemyBullet -> List EnemyBullet
-animateEnemyBullets shooters bullets =
-    bullets
-        |> List.map animateEnemyBullet
-        |> (++) (List.map shootBullet shooters)
+animateEnemies_ :
+    Float
+    -> { a | enemies : List Enemy, enemyBullets : List EnemyBullet }
+    -> { a | enemies : List Enemy, enemyBullets : List EnemyBullet }
+animateEnemies_ elapsed model =
+    let
+        ( newEnemies, newBullets ) =
+            model
+                |> (.enemies >> List.map (animateEnemy elapsed))
+                |> List.unzip
+                |> Tuple.mapSecond List.concat
+    in
+    { model | enemyBullets = model.enemyBullets ++ newBullets, enemies = newEnemies }
+
+
+animateEnemyBullets :
+    { a | enemies : List Enemy, enemyBullets : List EnemyBullet }
+    -> { a | enemies : List Enemy, enemyBullets : List EnemyBullet }
+animateEnemyBullets model =
+    let
+        newBullets =
+            model.enemyBullets
+                |> List.map animateEnemyBullet
+    in
+    { model | enemyBullets = newBullets }
 
 
 shootBullet : Enemy -> EnemyBullet
@@ -98,6 +133,7 @@ shootBullet shooter =
     EnemyBullet (moveBy ( round <| enemyWidth / 2, enemyHeight ) shooter.pos) 0 5
 
 
+animateEnemyBullet : EnemyBullet -> EnemyBullet
 animateEnemyBullet bullet =
     let
         ( x, y ) =
@@ -119,60 +155,46 @@ changeEnemyDir index dir enemies =
             )
 
 
-animateEnemy : Float -> Enemy -> Enemy
+animateEnemy : Float -> Enemy -> ( Enemy, List EnemyBullet )
 animateEnemy elapsed enemy =
     enemy
-        |> moveEnemy elapsed
-        |> animateDirChange elapsed
+        |> moveEnemy
         |> animateShootBullet elapsed
 
 
-animateShootBullet : Float -> Enemy -> Enemy
+animateShootBullet : Float -> Enemy -> ( Enemy, List EnemyBullet )
 animateShootBullet elapsed enemy =
     let
-        shootBulletElapsed =
-            enemy.shootBulletElapsed + elapsed
+        newAnimation =
+            updateAnimation enemy.shootBulletAnimation elapsed
 
-        interval =
-            1000
+        bullets =
+            if newAnimation.shouldTrigger then
+                [ shootBullet enemy ]
+
+            else
+                []
     in
-    if shootBulletElapsed > interval then
-        { enemy | shootBulletElapsed = shootBulletElapsed - interval, shootBullet = True }
-
-    else
-        { enemy | shootBulletElapsed = shootBulletElapsed, shootBullet = False }
+    ( { enemy | shootBulletAnimation = newAnimation }, bullets )
 
 
 animateDirChange : Float -> Enemy -> Enemy
 animateDirChange elapsed enemy =
     let
-        changeDirElapsed_ =
-            enemy.changeDirElapsed + elapsed
-
-        interval =
-            2000
+        newAnimation =
+            updateAnimation enemy.changeDirAnimation elapsed
     in
-    if changeDirElapsed_ > interval || enemy.changeDir then
-        { enemy | changeDirElapsed = changeDirElapsed_ - interval, changeDir = True }
-
-    else
-        { enemy | changeDirElapsed = changeDirElapsed_ }
+    { enemy | changeDirAnimation = newAnimation }
 
 
-moveEnemy : Float -> Enemy -> Enemy
-moveEnemy elapsed enemy =
+moveEnemy : Enemy -> Enemy
+moveEnemy enemy =
     let
         ( x, y ) =
             enemy.pos
 
         dx =
             5
-
-        interval =
-            20
-
-        animationElapsed_ =
-            enemy.animationElapsed + elapsed
 
         dirFactor =
             case enemy.dir of
@@ -188,15 +210,11 @@ moveEnemy elapsed enemy =
         newX =
             x + dirFactor * dx
     in
-    if animationElapsed_ > interval then
-        if inBoundsX ( newX, y ) enemyWidth then
-            { enemy | pos = ( newX, y ), animationElapsed = animationElapsed_ - interval, changeDir = False }
-
-        else
-            { enemy | pos = ( x, y ), animationElapsed = animationElapsed_ - interval, changeDir = True }
+    if inBoundsX ( newX, y ) enemyWidth then
+        { enemy | pos = ( newX, y ) }
 
     else
-        { enemy | animationElapsed = animationElapsed_ }
+        { enemy | pos = ( x, y ) }
 
 
 drawEnemy : Enemy -> Svg Msg

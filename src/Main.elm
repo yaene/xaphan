@@ -1,10 +1,11 @@
 module Main exposing (main)
 
+import Animation exposing (Animation)
 import Browser
 import Browser.Events exposing (onAnimationFrameDelta, onKeyDown, onKeyUp)
-import Collision exposing (collideBulletsEnemies, collideBulletsHero, isHeroHit)
+import Collision exposing (checkCollision)
 import Dir exposing (Dir(..))
-import Enemy exposing (Enemy, EnemyBullet, animateEnemies, changeEnemyDir, drawBullets, drawEnemies)
+import Enemy exposing (Enemy, EnemyBullet, animateEnemies, changeDirCmds, changeEnemyDir, drawBullets, drawEnemies)
 import Field exposing (Pos)
 import Hero exposing (..)
 import Html
@@ -42,7 +43,7 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model (Hero.init ()) [] [ Enemy ( 50, 50 ) 2 0 Right 0 False 0 False ] [] Playing, Cmd.none )
+    ( Model (Hero.init ()) [] [ Enemy ( 50, 50 ) 2 0 Right (Animation 0 1500 False True) (Animation 0 1000 False True) ] [] Playing, Cmd.none )
 
 
 view : Model -> Html.Html Msg
@@ -171,39 +172,21 @@ update msg model =
 animate : Float -> Model -> ( Model, Cmd Msg )
 animate elapsed model =
     if model.state == Playing then
-        let
-            ( enemies, enemyBullets, cmd ) =
-                animateEnemies elapsed ( model.enemies, model.enemyBullets )
-
-            ( hero, heroBullets ) =
-                animateHero elapsed model.hero model.heroBullets
-
-            ( aliveEnemies, uncollidedBullets ) =
-                collideBulletsEnemies enemies heroBullets
-
-            ( collidedHero, uncollidedEnemyBullets ) =
-                collideBulletsHero hero enemyBullets
-        in
-        ( { model
-            | hero = collidedHero
-            , heroBullets = uncollidedBullets
-            , enemies = aliveEnemies
-            , enemyBullets = uncollidedEnemyBullets
-            , state =
-                model
-                    |> newState
-          }
-        , cmd
-        )
+        model
+            |> animateEnemies elapsed
+            |> animateHero elapsed
+            |> checkCollision
+            |> newState
+            |> changeDirCmds elapsed
 
     else
         ( model, Cmd.none )
 
 
-newState : Model -> State
+newState : Model -> Model
 newState model =
     if model.hero.hp <= 0 then
-        GameOver
+        { model | state = GameOver }
 
     else
-        Playing
+        { model | state = Playing }
