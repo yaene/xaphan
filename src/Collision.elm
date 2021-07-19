@@ -3,7 +3,7 @@ module Collision exposing (checkCollision)
 import Enemy exposing (Enemy, EnemyBullet, enemyHeight, enemyWidth)
 import Field exposing (Pos)
 import Hero exposing (Hero, HeroBullet, heroHeight, heroWidth)
-import List exposing (map)
+import List
 
 
 isHeroHit : Hero -> List EnemyBullet -> Bool
@@ -33,7 +33,7 @@ checkCollision model =
 
 isBulletCollidingHero : Hero -> EnemyBullet -> Bool
 isBulletCollidingHero { pos } { posBullet } =
-    isColliding ( pos, ( enemyWidth, enemyHeight ) ) ( posBullet, ( Enemy.bulletWidth, Enemy.bulletHeight ) )
+    isColliding ( pos, ( heroWidth, heroHeight ) ) ( posBullet, ( Enemy.bulletWidth, Enemy.bulletHeight ) )
 
 
 isColliding : ( Pos, ( Int, Int ) ) -> ( Pos, ( Int, Int ) ) -> Bool
