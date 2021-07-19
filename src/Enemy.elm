@@ -13,7 +13,7 @@ module Enemy exposing
     , newBasicEnemy
     )
 
-import Animation exposing (Animation, updateAnimation)
+import Animation exposing (Animation, newAnimation, updateAnimation)
 import Dict exposing (update)
 import Dir exposing (Dir(..))
 import Field exposing (Pos, inBoundsX, moveBy)
@@ -54,7 +54,7 @@ type alias EnemyBullet =
 
 newBasicEnemy : Pos -> Dir -> Enemy
 newBasicEnemy pos dir =
-    Enemy pos 5 0 dir (Animation 0 1500 False True) (Animation 0 1000 False True)
+    Enemy pos 5 0 dir (newAnimation 1500) (newAnimation 1000)
 
 
 drawEnemies : List Enemy -> List (Svg Msg)

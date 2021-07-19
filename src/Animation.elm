@@ -1,4 +1,4 @@
-module Animation exposing (..)
+module Animation exposing (Animation, newAnimation, updateAnimation)
 
 
 type alias Animation =
@@ -7,6 +7,11 @@ type alias Animation =
     , shouldTrigger : Bool
     , isActive : Bool
     }
+
+
+newAnimation : Float -> Animation
+newAnimation interval =
+    Animation 0 interval False True
 
 
 updateAnimation : Animation -> Float -> Animation
