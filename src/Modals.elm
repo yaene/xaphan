@@ -9,6 +9,7 @@ import Messages exposing (Msg(..))
 type ModalType
     = PauseMenu
     | ClearedMessage
+    | WonMessage
 
 
 drawModal : ModalType -> Html Msg
@@ -19,6 +20,9 @@ drawModal modalType =
 
         ClearedMessage ->
             drawModal_ "Level Cleared" "Congrats you cleared the level!" [ ( "Next Level", NextLevel ) ]
+
+        WonMessage ->
+            drawModal_ "You Won :-)" "Congrats you have cleared the whole game!" []
 
 
 drawModal_ : String -> String -> List ( String, Msg ) -> Html Msg
