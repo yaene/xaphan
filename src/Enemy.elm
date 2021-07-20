@@ -15,7 +15,7 @@ module Enemy exposing
     , newSunEnemy
     )
 
-import Animation exposing (Animation, newAnimation, updateAnimation)
+import Animation exposing (Animation, newAnimation, updateAnimationWithSub)
 import Dict exposing (update)
 import Dir exposing (Dir(..))
 import Field exposing (Pos, inBoundsX, moveBy)
@@ -203,7 +203,7 @@ animateShootBullet : Float -> Enemy -> ( Enemy, List EnemyBullet )
 animateShootBullet elapsed enemy =
     let
         newAnimation =
-            updateAnimation enemy.triggerShootAnimaton elapsed
+            updateAnimationWithSub enemy.triggerShootAnimaton elapsed
 
         bullets =
             if newAnimation.shouldTrigger then
@@ -219,7 +219,7 @@ animateDirChange : Float -> Enemy -> Enemy
 animateDirChange elapsed enemy =
     let
         newAnimation =
-            updateAnimation enemy.changeDirAnimation elapsed
+            updateAnimationWithSub enemy.changeDirAnimation elapsed
     in
     { enemy | changeDirAnimation = newAnimation }
 
