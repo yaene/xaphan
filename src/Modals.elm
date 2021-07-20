@@ -26,7 +26,7 @@ drawModal modalType =
             drawModal_ "You Won :-)" "Congrats you have cleared the whole game!" []
 
         LostMessage ->
-            drawModal_ "Game Over :-(" "Better luck next time!" []
+            drawModal_ "Game Over :-(" "Better luck next time!" [ ( "Try again", Retry ) ]
 
 
 drawModal_ : String -> String -> List ( String, Msg ) -> Html Msg

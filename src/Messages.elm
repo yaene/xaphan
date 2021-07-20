@@ -14,4 +14,5 @@ type Msg
     | NextLevel
     | Pause
     | Resume
+    | Retry
     | Noop

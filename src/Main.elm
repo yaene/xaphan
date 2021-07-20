@@ -201,6 +201,13 @@ update msg model =
         Resume ->
             ( { model | state = Playing }, Cmd.none )
 
+        Retry ->
+            let
+                ( newModel, _ ) =
+                    init ()
+            in
+            ( { newModel | enemies = loadLevel <| model.level, level = model.level }, Cmd.none )
+
         Noop ->
             ( model, Cmd.none )
 
