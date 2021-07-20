@@ -2,7 +2,7 @@ module Levels exposing (Level, drawClearedLevel, loadLevel)
 
 import Animation exposing (Animation)
 import Dir exposing (Dir(..))
-import Enemy exposing (Enemy, newBasicEnemy, newSunEnemy)
+import Enemy exposing (Enemy, newBasicEnemy, newSpiralEnemy, newSunEnemy)
 import Html exposing (Html, button, text)
 import Html.Events exposing (onClick)
 import Messages exposing (Msg(..))
@@ -20,15 +20,15 @@ loadLevel : Level -> LevelData
 loadLevel level =
     case level of
         1 ->
-            [ newBasicEnemy ( 50, 50 ) Right ]
-
-        2 ->
             [ newBasicEnemy ( 50, 50 ) Right
             , newBasicEnemy ( 400, 200 ) Left
             ]
 
-        3 ->
+        2 ->
             [ newSunEnemy ( 500, 200 ) Left ]
+
+        3 ->
+            [ newSpiralEnemy ( 50, 50 ) Right ]
 
         _ ->
             []

@@ -11,6 +11,7 @@ module Enemy exposing
     , enemyHeight
     , enemyWidth
     , newBasicEnemy
+    , newSpiralEnemy
     , newSunEnemy
     )
 
@@ -44,8 +45,8 @@ type alias Enemy =
     , hp : Int
     , dir : Dir
     , changeDirAnimation : Animation
-    , shootBulletAnimation : Animation
-    , shootBulletFunc : Pos -> List EnemyBullet
+    , triggerShootAnimaton : Animation
+    , shootBulletFunc : Int -> Pos -> List EnemyBullet
     }
 
 
@@ -61,6 +62,11 @@ newBasicEnemy pos dir =
 newSunEnemy : Pos -> Dir -> Enemy
 newSunEnemy pos dir =
     Enemy pos 5 dir (newAnimation 1500) (newAnimation 1000) shootSunBullets
+
+
+newSpiralEnemy : Pos -> Dir -> Enemy
+newSpiralEnemy pos dir =
+    Enemy pos 5 dir (newAnimation 1500) (newAnimation 20) shootSpiralBullet
 
 
 drawEnemies : List Enemy -> List (Svg Msg)
@@ -140,9 +146,9 @@ animateEnemyBullets model =
     { model | enemyBullets = newBullets }
 
 
-shootSunBullets : Pos -> List EnemyBullet
-shootSunBullets shooterPos =
-    List.range 0 8
+shootSunBullets : Int -> Pos -> List EnemyBullet
+shootSunBullets _ shooterPos =
+    List.range 0 7
         |> List.map
             (\i ->
                 EnemyBullet (moveBy ( round <| enemyWidth / 2, round <| enemyHeight / 2 ) shooterPos)
@@ -151,9 +157,17 @@ shootSunBullets shooterPos =
             )
 
 
-shootBullet : Pos -> List EnemyBullet
-shootBullet shooterPos =
+shootBullet : Int -> Pos -> List EnemyBullet
+shootBullet _ shooterPos =
     [ EnemyBullet (moveBy ( round <| enemyWidth / 2, enemyHeight ) shooterPos) 0 5 ]
+
+
+shootSpiralBullet : Int -> Pos -> List EnemyBullet
+shootSpiralBullet count shooterPos =
+    [ EnemyBullet (moveBy ( round <| enemyWidth / 2, round <| enemyHeight / 2 ) shooterPos)
+        (round <| (15 * cos ((count |> toFloat) * pi / 10)))
+        (round <| (15 * sin ((count |> toFloat) * pi / 10)))
+    ]
 
 
 animateEnemyBullet : EnemyBullet -> EnemyBullet
@@ -189,16 +203,16 @@ animateShootBullet : Float -> Enemy -> ( Enemy, List EnemyBullet )
 animateShootBullet elapsed enemy =
     let
         newAnimation =
-            updateAnimation enemy.shootBulletAnimation elapsed
+            updateAnimation enemy.triggerShootAnimaton elapsed
 
         bullets =
             if newAnimation.shouldTrigger then
-                enemy.shootBulletFunc enemy.pos
+                enemy.shootBulletFunc newAnimation.triggerCount enemy.pos
 
             else
                 []
     in
-    ( { enemy | shootBulletAnimation = newAnimation }, bullets )
+    ( { enemy | triggerShootAnimaton = newAnimation }, bullets )
 
 
 animateDirChange : Float -> Enemy -> Enemy

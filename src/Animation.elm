@@ -6,12 +6,13 @@ type alias Animation =
     , interval : Float
     , shouldTrigger : Bool
     , isActive : Bool
+    , triggerCount : Int
     }
 
 
 newAnimation : Float -> Animation
 newAnimation interval =
-    Animation 0 interval False True
+    Animation 0 interval False True 0
 
 
 updateAnimation : Animation -> Float -> Animation
@@ -22,7 +23,7 @@ updateAnimation animation elapsed =
                 animation.elapsed + elapsed
         in
         if nElapsed > animation.interval then
-            { animation | elapsed = nElapsed - animation.interval, shouldTrigger = True }
+            { animation | elapsed = nElapsed - animation.interval, shouldTrigger = True, triggerCount = animation.triggerCount + 1 }
 
         else
             { animation | elapsed = nElapsed, shouldTrigger = False }
