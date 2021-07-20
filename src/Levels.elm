@@ -2,7 +2,7 @@ module Levels exposing (Level, drawClearedLevel, loadLevel)
 
 import Dir exposing (Dir(..))
 import Enemy exposing (Enemy, newBasicEnemy, newSpiralEnemy, newSunEnemy)
-import Html exposing (Html, text)
+import Html exposing (Html)
 import Messages exposing (Msg(..))
 import Modals exposing (ModalType(..), drawModal)
 

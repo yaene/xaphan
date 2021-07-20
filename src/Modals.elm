@@ -10,6 +10,7 @@ type ModalType
     = PauseMenu
     | ClearedMessage
     | WonMessage
+    | LostMessage
 
 
 drawModal : ModalType -> Html Msg
@@ -23,6 +24,9 @@ drawModal modalType =
 
         WonMessage ->
             drawModal_ "You Won :-)" "Congrats you have cleared the whole game!" []
+
+        LostMessage ->
+            drawModal_ "Game Over :-(" "Better luck next time!" []
 
 
 drawModal_ : String -> String -> List ( String, Msg ) -> Html Msg
@@ -44,7 +48,7 @@ drawModal_ title content actions =
             , style "align-items" "center"
             , style "background-color" "white"
             , style "border-radius" "10px"
-            , style "min-height" "200px"
+            , style "min-height" "100px"
             , style "width" "200px"
             , style "padding" "10px 20px 10px 20px"
             ]

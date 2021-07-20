@@ -6,7 +6,7 @@ import Collision exposing (checkCollision)
 import Dir exposing (Dir(..))
 import Enemy exposing (Enemy, EnemyBullet, animateEnemies, changeDirCmds, changeEnemyDir, drawBullets, drawEnemies)
 import Hero exposing (..)
-import Html exposing (text)
+import Html
 import Html.Attributes as HtmlAttr
 import Html.Events exposing (keyCode)
 import Json.Decode
@@ -75,7 +75,7 @@ view model =
                     Levels.drawClearedLevel model.level
 
                 GameOver ->
-                    [ text "you lost :-(" ]
+                    [ drawModal LostMessage ]
     in
     Html.div
         [ HtmlAttr.style "display" "flex"
