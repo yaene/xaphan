@@ -15,7 +15,7 @@ module Enemy exposing
     , newSunEnemy
     )
 
-import Animation exposing (Animation, newAnimation, updateAnimationWithSub)
+import Animation exposing (Animation, newAnimation, newAnimationWithSub, updateAnimationWithSub)
 import Dict exposing (update)
 import Dir exposing (Dir(..))
 import Field exposing (Pos, inBoundsX, moveBy)
@@ -66,7 +66,7 @@ newSunEnemy pos dir =
 
 newSpiralEnemy : Pos -> Dir -> Enemy
 newSpiralEnemy pos dir =
-    Enemy pos 5 dir (newAnimation 1500) (newAnimation 20) shootSpiralBullet
+    Enemy pos 5 dir (newAnimation 1500) (newAnimationWithSub 1000 20 20) shootSpiralBullet
 
 
 drawEnemies : List Enemy -> List (Svg Msg)
@@ -207,7 +207,12 @@ animateShootBullet elapsed enemy =
 
         bullets =
             if newAnimation.shouldTrigger then
-                enemy.shootBulletFunc newAnimation.triggerCount enemy.pos
+                case newAnimation.subAnimation of
+                    Nothing ->
+                        enemy.shootBulletFunc newAnimation.triggerCount enemy.pos
+
+                    Just sub ->
+                        enemy.shootBulletFunc sub.triggerCount enemy.pos
 
             else
                 []
