@@ -26,7 +26,30 @@ drawModal_ =
         , style "width" "100%"
         , style "height" "100%"
         , style "background-color" "rgba(0,0,0,0.5)"
+        , style "display" "flex"
+        , style "justify-content" "center"
+        , style "align-items" "center"
         ]
-        [ div [] [ text "Pause Menu" ]
-        , div [] [ button [ onClick Resume ] [ text "Resume" ] ]
+        [ div
+            [ style "display" "flex"
+            , style "flex-direction" "column"
+            , style "align-items" "center"
+            , style "background-color" "white"
+            , style "border-radius" "10px"
+            , style "min-height" "200px"
+            , style "width" "200px"
+            , style "padding" "10px 5px 10px 5px"
+            ]
+            [ div
+                [ style "margin-bottom" "10px"
+                ]
+                [ text "Pause Menu" ]
+            , div
+                [ style "display" "flex"
+                , style "flex-grow" "1"
+                , style "flex-direction" "column"
+                , style "justify-content" "center"
+                ]
+                [ button [ onClick Resume ] [ text "Resume" ] ]
+            ]
         ]
