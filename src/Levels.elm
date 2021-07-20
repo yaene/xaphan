@@ -41,4 +41,4 @@ drawClearedLevel level =
             [ text "You won :-)" ]
 
         _ ->
-            [ button [ onClick <| NextLevel (level + 1) ] [ text "Next Level" ] ]
+            [ button [ onClick NextLevel ] [ text "Next Level" ] ]

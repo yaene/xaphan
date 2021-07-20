@@ -50,6 +50,13 @@ drawModal_ =
                 , style "flex-direction" "column"
                 , style "justify-content" "center"
                 ]
-                [ button [ onClick Resume ] [ text "Resume" ] ]
+                [ modalButton "Resume" Resume
+                , modalButton "Skip Level" NextLevel
+                ]
             ]
         ]
+
+
+modalButton : String -> Msg -> Html Msg
+modalButton content msg =
+    button [ onClick msg ] [ text content ]
