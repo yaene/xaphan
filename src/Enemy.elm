@@ -15,7 +15,7 @@ module Enemy exposing
     , newSunEnemy
     )
 
-import Animation exposing (Animation, newAnimation, newAnimationWithSub, updateAnimationWithSub)
+import Animation exposing (Animation, newAnimation, newAnimationWithSub, updateAnimation)
 import Dict exposing (update)
 import Dir exposing (Dir(..))
 import Field exposing (Pos, inBoundsX, moveBy)
@@ -203,28 +203,33 @@ animateShootBullet : Float -> Enemy -> ( Enemy, List EnemyBullet )
 animateShootBullet elapsed enemy =
     let
         newAnimation =
-            updateAnimationWithSub enemy.triggerShootAnimaton elapsed
+            updateAnimation enemy.triggerShootAnimaton elapsed
 
         bullets =
-            if newAnimation.shouldTrigger then
-                case newAnimation.subAnimation of
-                    Nothing ->
-                        enemy.shootBulletFunc newAnimation.triggerCount enemy.pos
+            case newAnimation.subAnimation of
+                Nothing ->
+                    triggerShoot newAnimation enemy
 
-                    Just sub ->
-                        enemy.shootBulletFunc sub.triggerCount enemy.pos
-
-            else
-                []
+                Just sub ->
+                    triggerShoot sub enemy
     in
     ( { enemy | triggerShootAnimaton = newAnimation }, bullets )
+
+
+triggerShoot : { a | shouldTrigger : Bool, triggerCount : Int } -> Enemy -> List EnemyBullet
+triggerShoot animation enemy =
+    if animation.shouldTrigger then
+        enemy.shootBulletFunc animation.triggerCount enemy.pos
+
+    else
+        []
 
 
 animateDirChange : Float -> Enemy -> Enemy
 animateDirChange elapsed enemy =
     let
         newAnimation =
-            updateAnimationWithSub enemy.changeDirAnimation elapsed
+            updateAnimation enemy.changeDirAnimation elapsed
     in
     { enemy | changeDirAnimation = newAnimation }
 
