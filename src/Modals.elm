@@ -17,7 +17,12 @@ drawModal : ModalType -> Html Msg
 drawModal modalType =
     case modalType of
         PauseMenu ->
-            drawModal_ "Pause Menu" "" [ ( "Resume", Resume ), ( "Skip Level", NextLevel ) ]
+            drawModal_ "Pause Menu"
+                ""
+                [ ( "Resume", Resume )
+                , ( "Skip Level", NextLevel )
+                , ( "Restart Level", Retry )
+                ]
 
         ClearedMessage ->
             drawModal_ "Level Cleared" "Congrats you cleared the level!" [ ( "Next Level", NextLevel ) ]
