@@ -5,6 +5,7 @@ import Enemy exposing (Enemy, newBasicEnemy, newSpiralEnemy, newSunEnemy)
 import Html exposing (Html, button, text)
 import Html.Events exposing (onClick)
 import Messages exposing (Msg(..))
+import Modals exposing (ModalType(..), drawModal)
 
 
 type alias Level =
@@ -40,4 +41,4 @@ drawClearedLevel level =
             [ text "You won :-)" ]
 
         _ ->
-            [ button [ onClick NextLevel ] [ text "Next Level" ] ]
+            [ drawModal ClearedMessage ]

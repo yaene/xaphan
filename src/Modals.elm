@@ -8,17 +8,21 @@ import Messages exposing (Msg(..))
 
 type ModalType
     = PauseMenu
+    | ClearedMessage
 
 
 drawModal : ModalType -> Html Msg
 drawModal modalType =
     case modalType of
         PauseMenu ->
-            drawModal_ "Pause Menu" [ ( "Resume", Resume ), ( "Skip Level", NextLevel ) ]
+            drawModal_ "Pause Menu" "" [ ( "Resume", Resume ), ( "Skip Level", NextLevel ) ]
+
+        ClearedMessage ->
+            drawModal_ "Level Cleared" "Congrats you cleared the level!" [ ( "Next Level", NextLevel ) ]
 
 
-drawModal_ : String -> List ( String, Msg ) -> Html Msg
-drawModal_ title actions =
+drawModal_ : String -> String -> List ( String, Msg ) -> Html Msg
+drawModal_ title content actions =
     div
         [ style "position" "fixed"
         , style "left" "0"
@@ -38,12 +42,19 @@ drawModal_ title actions =
             , style "border-radius" "10px"
             , style "min-height" "200px"
             , style "width" "200px"
-            , style "padding" "10px 5px 10px 5px"
+            , style "padding" "10px 20px 10px 20px"
             ]
             [ div
                 [ style "margin-bottom" "10px"
+                , style "font-size" "20px"
+                , style "font-weight" "bold"
                 ]
                 [ text title ]
+            , div
+                [ style "margin-bottom" "10px"
+                , style "font-size" "12px"
+                ]
+                [ text content ]
             , div
                 [ style "display" "flex"
                 , style "flex-grow" "1"
