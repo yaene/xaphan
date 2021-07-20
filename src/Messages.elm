@@ -12,4 +12,5 @@ type Msg
     | HeroShootBullet
     | ChangeEnemyDir ( Int, Dir )
     | NextLevel Int
+    | Pause
     | Noop

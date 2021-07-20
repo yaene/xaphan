@@ -14,6 +14,7 @@ import Html.Events exposing (keyCode)
 import Json.Decode
 import Levels exposing (Level, loadLevel)
 import Messages exposing (Msg(..))
+import Modals exposing (ModalType(..), drawModal)
 import Svg exposing (Svg, rect)
 import Svg.Attributes as SvgAttr
 
@@ -30,6 +31,7 @@ type alias Model =
 
 type State
     = Playing
+    | Paused
     | Cleared
     | GameOver
 
@@ -67,6 +69,9 @@ view model =
                                )
                         )
                     ]
+
+                Paused ->
+                    [ drawModal PauseMenu ]
 
                 Cleared ->
                     Levels.drawClearedLevel model.level
@@ -138,6 +143,10 @@ key on keycode =
             else
                 Noop
 
+        -- key: ESC
+        27 ->
+            Pause
+
         _ ->
             Noop
 
@@ -186,6 +195,9 @@ update msg model =
                     init ()
             in
             ( { newModel | enemies = loadLevel level, state = Playing, level = level }, Cmd.none )
+
+        Pause ->
+            ( { model | state = Paused }, Cmd.none )
 
         Noop ->
             ( model, Cmd.none )

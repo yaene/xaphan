@@ -1,4 +1,4 @@
-module Modals exposing (ModalType, drawModal)
+module Modals exposing (ModalType(..), drawModal)
 
 import Html exposing (Html, text)
 import Messages exposing (Msg)
