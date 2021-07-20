@@ -13,4 +13,5 @@ type Msg
     | ChangeEnemyDir ( Int, Dir )
     | NextLevel Int
     | Pause
+    | Resume
     | Noop

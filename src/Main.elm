@@ -200,6 +200,9 @@ update msg model =
         Pause ->
             ( { model | state = Paused }, Cmd.none )
 
+        Resume ->
+            ( { model | state = Playing }, Cmd.none )
+
         Noop ->
             ( model, Cmd.none )
 
