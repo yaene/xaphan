@@ -1,12 +1,10 @@
 module Main exposing (main)
 
-import Animation exposing (Animation)
 import Browser
 import Browser.Events exposing (onAnimationFrameDelta, onKeyDown, onKeyUp)
 import Collision exposing (checkCollision)
 import Dir exposing (Dir(..))
 import Enemy exposing (Enemy, EnemyBullet, animateEnemies, changeDirCmds, changeEnemyDir, drawBullets, drawEnemies)
-import Field exposing (Pos)
 import Hero exposing (..)
 import Html exposing (text)
 import Html.Attributes as HtmlAttr
@@ -15,7 +13,7 @@ import Json.Decode
 import Levels exposing (Level, loadLevel)
 import Messages exposing (Msg(..))
 import Modals exposing (ModalType(..), drawModal)
-import Svg exposing (Svg, rect)
+import Svg
 import Svg.Attributes as SvgAttr
 
 
@@ -93,7 +91,7 @@ view model =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
     Sub.batch
         [ onAnimationFrameDelta Tick
         , onKeyUp (Json.Decode.map (key False) keyCode)

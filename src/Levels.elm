@@ -1,6 +1,5 @@
 module Levels exposing (Level, drawClearedLevel, loadLevel)
 
-import Animation exposing (Animation)
 import Dir exposing (Dir(..))
 import Enemy exposing (Enemy, newBasicEnemy, newSpiralEnemy, newSunEnemy)
 import Html exposing (Html, button, text)

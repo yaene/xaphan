@@ -1,9 +1,9 @@
 module Hero exposing (Hero, HeroBullet, animateHero, animateHeroBullets, bulletHeight, bulletWidth, drawHero, drawHeroBullets, heroHeight, heroWidth, init, moveHero, shootBullet, startMove)
 
 import Dir exposing (Dir(..))
-import Field exposing (Pos, inBoundsX, moveBy)
+import Field exposing (Pos, moveBy)
 import Messages exposing (Msg(..))
-import Svg exposing (Svg, rect)
+import Svg exposing (Svg)
 import Svg.Attributes as SvgAttr
 
 
@@ -69,7 +69,7 @@ animateHero :
     Float
     -> { a | hero : Hero, heroBullets : List HeroBullet }
     -> { a | hero : Hero, heroBullets : List HeroBullet }
-animateHero elapsed model =
+animateHero _ model =
     model
         |> moveHero
         |> animateHeroBullets

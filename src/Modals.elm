@@ -1,7 +1,7 @@
 module Modals exposing (ModalType(..), drawModal)
 
 import Html exposing (Html, button, div, text)
-import Html.Attributes as HtmlAttr exposing (style)
+import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 import Messages exposing (Msg(..))
 
