@@ -14,11 +14,11 @@ drawModal : ModalType -> Html Msg
 drawModal modalType =
     case modalType of
         PauseMenu ->
-            drawModal_
+            drawModal_ "Pause Menu" [ ( "Resume", Resume ), ( "Skip Level", NextLevel ) ]
 
 
-drawModal_ : Html Msg
-drawModal_ =
+drawModal_ : String -> List ( String, Msg ) -> Html Msg
+drawModal_ title actions =
     div
         [ style "position" "fixed"
         , style "left" "0"
@@ -43,22 +43,20 @@ drawModal_ =
             [ div
                 [ style "margin-bottom" "10px"
                 ]
-                [ text "Pause Menu" ]
+                [ text title ]
             , div
                 [ style "display" "flex"
                 , style "flex-grow" "1"
                 , style "flex-direction" "column"
                 , style "justify-content" "center"
                 ]
-                [ modalButton "Resume" Resume
-                , modalButton "Skip Level" NextLevel
-                ]
+                (actions |> List.map modalButton)
             ]
         ]
 
 
-modalButton : String -> Msg -> Html Msg
-modalButton content msg =
+modalButton : ( String, Msg ) -> Html Msg
+modalButton ( content, msg ) =
     button
         [ onClick msg
         , style "margin-bottom" "10px"
