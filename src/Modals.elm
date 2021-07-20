@@ -59,4 +59,8 @@ drawModal_ =
 
 modalButton : String -> Msg -> Html Msg
 modalButton content msg =
-    button [ onClick msg ] [ text content ]
+    button
+        [ onClick msg
+        , style "margin-bottom" "10px"
+        ]
+        [ text content ]
