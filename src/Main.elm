@@ -58,8 +58,8 @@ view model =
             case model.state of
                 Playing ->
                     [ Svg.svg
-                        [ SvgAttr.height "100%"
-                        , SvgAttr.width "100%"
+                        [ SvgAttr.height "99%"
+                        , SvgAttr.width "99%"
                         , SvgAttr.viewBox "0 0 1000 1000"
                         ]
                         (drawHero model.hero
@@ -84,7 +84,8 @@ view model =
         , HtmlAttr.style "justify-content" "center"
         ]
         [ Html.div
-            [ HtmlAttr.style "width" "99vh"
+            [ HtmlAttr.style "width" "100vh"
+            , HtmlAttr.style "height" "100vh"
             , HtmlAttr.style "background-color" "gray"
             ]
             content
