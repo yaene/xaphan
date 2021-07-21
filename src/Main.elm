@@ -8,10 +8,11 @@ import Dir exposing (Dir(..))
 import Enemy exposing (Enemy, EnemyBullet, animateEnemies, changeDirCmds, changeEnemyDir, drawBullets, drawEnemies)
 import Field exposing (Pos)
 import Hero exposing (..)
-import Html
+import Html exposing (text)
 import Html.Attributes as HtmlAttr
 import Html.Events exposing (keyCode)
 import Json.Decode
+import Levels exposing (Level, loadLevel)
 import Messages exposing (Msg(..))
 import Svg exposing (Svg, rect)
 import Svg.Attributes as SvgAttr
@@ -22,12 +23,14 @@ type alias Model =
     , heroBullets : List HeroBullet
     , enemies : List Enemy
     , enemyBullets : List EnemyBullet
+    , level : Level
     , state : State
     }
 
 
 type State
     = Playing
+    | Cleared
     | GameOver
 
 
@@ -43,11 +46,34 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model (Hero.init ()) [] [ Enemy ( 50, 50 ) 2 0 Right (Animation 0 1500 False True) (Animation 0 1000 False True) ] [] Playing, Cmd.none )
+    ( Model (Hero.init ()) [] (loadLevel 1) [] 1 Playing, Cmd.none )
 
 
 view : Model -> Html.Html Msg
 view model =
+    let
+        content =
+            case model.state of
+                Playing ->
+                    [ Svg.svg
+                        [ SvgAttr.height "100%"
+                        , SvgAttr.width "100%"
+                        , SvgAttr.viewBox "0 0 1000 1000"
+                        ]
+                        (drawHero model.hero
+                            :: (drawEnemies model.enemies
+                                    ++ drawBullets model.enemyBullets
+                                    ++ drawBullets model.heroBullets
+                               )
+                        )
+                    ]
+
+                Cleared ->
+                    Levels.drawClearedLevel model.level
+
+                GameOver ->
+                    [ text "you lost :-(" ]
+    in
     Html.div
         [ HtmlAttr.style "display" "flex"
         , HtmlAttr.style "justify-content" "center"
@@ -56,18 +82,7 @@ view model =
             [ HtmlAttr.style "width" "99vh"
             , HtmlAttr.style "background-color" "gray"
             ]
-            [ Svg.svg
-                [ SvgAttr.height "100%"
-                , SvgAttr.width "100%"
-                , SvgAttr.viewBox "0 0 1000 1000"
-                ]
-                (drawHero model.hero
-                    :: (drawEnemies model.enemies
-                            ++ drawBullets model.enemyBullets
-                            ++ drawBullets model.heroBullets
-                       )
-                )
-            ]
+            content
         ]
 
 
@@ -165,22 +180,30 @@ update msg model =
         ChangeEnemyDir ( index, dir ) ->
             ( { model | enemies = changeEnemyDir index dir model.enemies }, Cmd.none )
 
+        NextLevel level ->
+            let
+                ( newModel, _ ) =
+                    init ()
+            in
+            ( { newModel | enemies = loadLevel level, state = Playing, level = level }, Cmd.none )
+
         Noop ->
             ( model, Cmd.none )
 
 
 animate : Float -> Model -> ( Model, Cmd Msg )
 animate elapsed model =
-    if model.state == Playing then
-        model
-            |> animateEnemies elapsed
-            |> animateHero elapsed
-            |> checkCollision
-            |> newState
-            |> changeDirCmds elapsed
+    case model.state of
+        Playing ->
+            model
+                |> animateEnemies elapsed
+                |> animateHero elapsed
+                |> checkCollision
+                |> newState
+                |> changeDirCmds elapsed
 
-    else
-        ( model, Cmd.none )
+        _ ->
+            ( model, Cmd.none )
 
 
 newState : Model -> Model
@@ -188,5 +211,13 @@ newState model =
     if model.hero.hp <= 0 then
         { model | state = GameOver }
 
+    else if List.isEmpty model.enemies then
+        case model.state of
+            Playing ->
+                { model | state = Cleared }
+
+            _ ->
+                model
+
     else
-        { model | state = Playing }
+        model

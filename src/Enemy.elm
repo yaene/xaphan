@@ -10,9 +10,12 @@ module Enemy exposing
     , drawEnemies
     , enemyHeight
     , enemyWidth
+    , newBasicEnemy
+    , newSpiralEnemy
+    , newSunEnemy
     )
 
-import Animation exposing (Animation, updateAnimation)
+import Animation exposing (Animation, newAnimation, newAnimationWithSub, updateAnimation)
 import Dict exposing (update)
 import Dir exposing (Dir(..))
 import Field exposing (Pos, inBoundsX, moveBy)
@@ -40,15 +43,30 @@ bulletHeight =
 type alias Enemy =
     { pos : Pos
     , hp : Int
-    , animationElapsed : Float
     , dir : Dir
     , changeDirAnimation : Animation
-    , shootBulletAnimation : Animation
+    , triggerShootAnimaton : Animation
+    , shootBulletFunc : Int -> Pos -> List EnemyBullet
     }
 
 
 type alias EnemyBullet =
     { posBullet : Pos, dx : Int, dy : Int }
+
+
+newBasicEnemy : Pos -> Dir -> Enemy
+newBasicEnemy pos dir =
+    Enemy pos 5 dir (newAnimation 1500) (newAnimation 1000) shootBullet
+
+
+newSunEnemy : Pos -> Dir -> Enemy
+newSunEnemy pos dir =
+    Enemy pos 5 dir (newAnimation 1500) (newAnimation 1000) shootSunBullets
+
+
+newSpiralEnemy : Pos -> Dir -> Enemy
+newSpiralEnemy pos dir =
+    Enemy pos 5 dir (newAnimation 1500) (newAnimationWithSub 1000 20 20) shootSpiralBullet
 
 
 drawEnemies : List Enemy -> List (Svg Msg)
@@ -128,9 +146,28 @@ animateEnemyBullets model =
     { model | enemyBullets = newBullets }
 
 
-shootBullet : Enemy -> EnemyBullet
-shootBullet shooter =
-    EnemyBullet (moveBy ( round <| enemyWidth / 2, enemyHeight ) shooter.pos) 0 5
+shootSunBullets : Int -> Pos -> List EnemyBullet
+shootSunBullets _ shooterPos =
+    List.range 0 7
+        |> List.map
+            (\i ->
+                EnemyBullet (moveBy ( round <| enemyWidth / 2, round <| enemyHeight / 2 ) shooterPos)
+                    (round <| (15 * cos ((i |> toFloat) * pi / 4)))
+                    (round <| (15 * sin ((i |> toFloat) * pi / 4)))
+            )
+
+
+shootBullet : Int -> Pos -> List EnemyBullet
+shootBullet _ shooterPos =
+    [ EnemyBullet (moveBy ( round <| enemyWidth / 2, enemyHeight ) shooterPos) 0 5 ]
+
+
+shootSpiralBullet : Int -> Pos -> List EnemyBullet
+shootSpiralBullet count shooterPos =
+    [ EnemyBullet (moveBy ( round <| enemyWidth / 2, round <| enemyHeight / 2 ) shooterPos)
+        (round <| (15 * cos ((count |> toFloat) * pi / 10)))
+        (round <| (15 * sin ((count |> toFloat) * pi / 10)))
+    ]
 
 
 animateEnemyBullet : EnemyBullet -> EnemyBullet
@@ -139,7 +176,7 @@ animateEnemyBullet bullet =
         ( x, y ) =
             bullet.posBullet
     in
-    { bullet | posBullet = ( x, y + bullet.dy ) }
+    { bullet | posBullet = ( x + bullet.dx, y + bullet.dy ) }
 
 
 changeEnemyDir : Int -> Dir -> List Enemy -> List Enemy
@@ -166,16 +203,26 @@ animateShootBullet : Float -> Enemy -> ( Enemy, List EnemyBullet )
 animateShootBullet elapsed enemy =
     let
         newAnimation =
-            updateAnimation enemy.shootBulletAnimation elapsed
+            updateAnimation enemy.triggerShootAnimaton elapsed
 
         bullets =
-            if newAnimation.shouldTrigger then
-                [ shootBullet enemy ]
+            case newAnimation.subAnimation of
+                Nothing ->
+                    triggerShoot newAnimation enemy
 
-            else
-                []
+                Just sub ->
+                    triggerShoot sub enemy
     in
-    ( { enemy | shootBulletAnimation = newAnimation }, bullets )
+    ( { enemy | triggerShootAnimaton = newAnimation }, bullets )
+
+
+triggerShoot : { a | shouldTrigger : Bool, triggerCount : Int } -> Enemy -> List EnemyBullet
+triggerShoot animation enemy =
+    if animation.shouldTrigger then
+        enemy.shootBulletFunc animation.triggerCount enemy.pos
+
+    else
+        []
 
 
 animateDirChange : Float -> Enemy -> Enemy
