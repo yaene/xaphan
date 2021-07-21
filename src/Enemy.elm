@@ -16,7 +16,6 @@ module Enemy exposing
     )
 
 import Animation exposing (Animation, newAnimation, newAnimationWithSub, updateAnimation)
-import Dict exposing (update)
 import Dir exposing (Dir(..))
 import Field exposing (Pos, inBoundsX, moveBy)
 import Messages exposing (Msg(..))

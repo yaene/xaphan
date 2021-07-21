@@ -11,5 +11,8 @@ type Msg
     | MoveHeroRight Bool
     | HeroShootBullet
     | ChangeEnemyDir ( Int, Dir )
-    | NextLevel Int
+    | NextLevel
+    | Pause
+    | Resume
+    | Retry
     | Noop
