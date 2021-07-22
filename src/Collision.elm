@@ -90,6 +90,15 @@ collideBulletsHero ({ hero, enemyBullets } as model) =
         model
 
 
+collideBulletsHero : Hero -> List EnemyBullet -> ( Hero, List EnemyBullet )
+collideBulletsHero hero bullets =
+    if isHeroHit hero bullets then
+        ( { hero | hp = hero.hp - 1 }, List.filter (not << isBulletCollidingHero hero) bullets )
+
+    else
+        ( hero, bullets )
+
+
 reduceEnemyHealth : Enemy -> List HeroBullet -> Enemy
 reduceEnemyHealth enemy heroBullets =
     if isEnemyHit enemy heroBullets then
