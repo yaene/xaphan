@@ -1,9 +1,9 @@
-module Collision exposing (collideBulletsEnemies, collideBulletsHero, isHeroHit)
+module Collision exposing (checkCollision)
 
 import Enemy exposing (Enemy, EnemyBullet, enemyHeight, enemyWidth)
 import Field exposing (Pos)
 import Hero exposing (Hero, HeroBullet, heroHeight, heroWidth)
-import List exposing (map)
+import List
 
 
 isHeroHit : Hero -> List EnemyBullet -> Bool
@@ -11,9 +11,29 @@ isHeroHit hero bullets =
     bullets |> List.any (isBulletCollidingHero hero)
 
 
+checkCollision :
+    { a
+        | enemies : List Enemy
+        , hero : Hero
+        , enemyBullets : List EnemyBullet
+        , heroBullets : List HeroBullet
+    }
+    ->
+        { a
+            | enemies : List Enemy
+            , hero : Hero
+            , enemyBullets : List EnemyBullet
+            , heroBullets : List HeroBullet
+        }
+checkCollision model =
+    model
+        |> collideBulletsEnemies
+        |> collideBulletsHero
+
+
 isBulletCollidingHero : Hero -> EnemyBullet -> Bool
 isBulletCollidingHero { pos } { posBullet } =
-    isColliding ( pos, ( enemyWidth, enemyHeight ) ) ( posBullet, ( Enemy.bulletWidth, Enemy.bulletHeight ) )
+    isColliding ( pos, ( heroWidth, heroHeight ) ) ( posBullet, ( Enemy.bulletWidth, Enemy.bulletHeight ) )
 
 
 isColliding : ( Pos, ( Int, Int ) ) -> ( Pos, ( Int, Int ) ) -> Bool
@@ -32,8 +52,10 @@ isBulletCollidingEnemy { pos } { posBullet } =
     isColliding ( pos, ( enemyWidth, enemyHeight ) ) ( posBullet, ( Hero.bulletWidth, Hero.bulletHeight ) )
 
 
-collideBulletsEnemies : List Enemy -> List HeroBullet -> ( List Enemy, List HeroBullet )
-collideBulletsEnemies enemies heroBullets =
+collideBulletsEnemies :
+    { a | enemies : List Enemy, heroBullets : List HeroBullet }
+    -> { a | enemies : List Enemy, heroBullets : List HeroBullet }
+collideBulletsEnemies ({ enemies, heroBullets } as model) =
     let
         aliveEnemies =
             enemies
@@ -47,16 +69,25 @@ collideBulletsEnemies enemies heroBullets =
                         List.all (not << (\enemy -> isBulletCollidingEnemy enemy bullet)) enemies
                     )
     in
-    ( aliveEnemies, uncollidedBullets )
+    { model | enemies = aliveEnemies, heroBullets = uncollidedBullets }
 
 
-collideBulletsHero : Hero -> List EnemyBullet -> ( Hero, List EnemyBullet )
-collideBulletsHero hero bullets =
-    if isHeroHit hero bullets then
-        ( { hero | hp = hero.hp - 1 }, List.filter (not << isBulletCollidingHero hero) bullets )
+collideBulletsHero :
+    { a | hero : Hero, enemyBullets : List EnemyBullet }
+    -> { a | hero : Hero, enemyBullets : List EnemyBullet }
+collideBulletsHero ({ hero, enemyBullets } as model) =
+    if isHeroHit hero enemyBullets then
+        let
+            newHero =
+                { hero | hp = hero.hp - 1 }
+
+            newBullets =
+                List.filter (not << isBulletCollidingHero hero) enemyBullets
+        in
+        { model | hero = newHero, enemyBullets = newBullets }
 
     else
-        ( hero, bullets )
+        model
 
 
 reduceEnemyHealth : Enemy -> List HeroBullet -> Enemy

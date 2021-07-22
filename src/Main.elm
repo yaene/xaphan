@@ -2,17 +2,18 @@ module Main exposing (main)
 
 import Browser
 import Browser.Events exposing (onAnimationFrameDelta, onKeyDown, onKeyUp)
-import Collision exposing (collideBulletsEnemies, collideBulletsHero, isHeroHit)
+import Collision exposing (checkCollision)
 import Dir exposing (Dir(..))
-import Enemy exposing (Enemy, EnemyBullet, animateEnemies, changeEnemyDir, drawBullets, drawEnemies)
-import Field exposing (Pos)
+import Enemy exposing (Enemy, EnemyBullet, animateEnemies, changeDirCmds, changeEnemyDir, drawBullets, drawEnemies)
 import Hero exposing (..)
 import Html
 import Html.Attributes as HtmlAttr
 import Html.Events exposing (keyCode)
 import Json.Decode
+import Levels exposing (Level, loadLevel)
 import Messages exposing (Msg(..))
-import Svg exposing (Svg, rect)
+import Modals exposing (ModalType(..), drawModal)
+import Svg
 import Svg.Attributes as SvgAttr
 
 
@@ -21,12 +22,15 @@ type alias Model =
     , heroBullets : List HeroBullet
     , enemies : List Enemy
     , enemyBullets : List EnemyBullet
+    , level : Level
     , state : State
     }
 
 
 type State
     = Playing
+    | Paused
+    | Cleared
     | GameOver
 
 
@@ -42,36 +46,52 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model (Hero.init ()) [] [ Enemy ( 50, 50 ) 2 0 Right 0 False 0 False ] [] Playing, Cmd.none )
+    ( Model (Hero.init ()) [] (loadLevel 1) [] 1 Playing, Cmd.none )
 
 
 view : Model -> Html.Html Msg
 view model =
+    let
+        content =
+            case model.state of
+                Playing ->
+                    [ Svg.svg
+                        [ SvgAttr.height "99%"
+                        , SvgAttr.width "99%"
+                        , SvgAttr.viewBox "0 0 1000 1000"
+                        ]
+                        (drawHero model.hero
+                            :: (drawEnemies model.enemies
+                                    ++ drawBullets model.enemyBullets
+                                    ++ drawBullets model.heroBullets
+                               )
+                        )
+                    ]
+
+                Paused ->
+                    [ drawModal PauseMenu ]
+
+                Cleared ->
+                    Levels.drawClearedLevel model.level
+
+                GameOver ->
+                    [ drawModal LostMessage ]
+    in
     Html.div
         [ HtmlAttr.style "display" "flex"
         , HtmlAttr.style "justify-content" "center"
         ]
         [ Html.div
-            [ HtmlAttr.style "width" "99vh"
+            [ HtmlAttr.style "width" "100vh"
+            , HtmlAttr.style "height" "100vh"
             , HtmlAttr.style "background-color" "gray"
             ]
-            [ Svg.svg
-                [ SvgAttr.height "100%"
-                , SvgAttr.width "100%"
-                , SvgAttr.viewBox "0 0 1000 1000"
-                ]
-                (drawHero model.hero
-                    :: (drawEnemies model.enemies
-                            ++ drawBullets model.enemyBullets
-                            ++ drawBullets model.heroBullets
-                       )
-                )
-            ]
+            content
         ]
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
     Sub.batch
         [ onAnimationFrameDelta Tick
         , onKeyUp (Json.Decode.map (key False) keyCode)
@@ -122,6 +142,10 @@ key on keycode =
             else
                 Noop
 
+        -- key: ESC
+        27 ->
+            Pause
+
         _ ->
             Noop
 
@@ -164,46 +188,57 @@ update msg model =
         ChangeEnemyDir ( index, dir ) ->
             ( { model | enemies = changeEnemyDir index dir model.enemies }, Cmd.none )
 
+        NextLevel ->
+            let
+                ( newModel, _ ) =
+                    init ()
+            in
+            ( { newModel | enemies = loadLevel <| model.level + 1, state = Playing, level = model.level + 1 }, Cmd.none )
+
+        Pause ->
+            ( { model | state = Paused }, Cmd.none )
+
+        Resume ->
+            ( { model | state = Playing }, Cmd.none )
+
+        Retry ->
+            let
+                ( newModel, _ ) =
+                    init ()
+            in
+            ( { newModel | enemies = loadLevel <| model.level, level = model.level }, Cmd.none )
+
         Noop ->
             ( model, Cmd.none )
 
 
 animate : Float -> Model -> ( Model, Cmd Msg )
 animate elapsed model =
-    if model.state == Playing then
-        let
-            ( enemies, enemyBullets, cmd ) =
-                animateEnemies elapsed ( model.enemies, model.enemyBullets )
+    case model.state of
+        Playing ->
+            model
+                |> animateEnemies elapsed
+                |> animateHero elapsed
+                |> checkCollision
+                |> newState
+                |> changeDirCmds elapsed
 
-            ( hero, heroBullets ) =
-                animateHero elapsed model.hero model.heroBullets
-
-            ( aliveEnemies, uncollidedBullets ) =
-                collideBulletsEnemies enemies heroBullets
-
-            ( collidedHero, uncollidedEnemyBullets ) =
-                collideBulletsHero hero enemyBullets
-        in
-        ( { model
-            | hero = collidedHero
-            , heroBullets = uncollidedBullets
-            , enemies = aliveEnemies
-            , enemyBullets = uncollidedEnemyBullets
-            , state =
-                model
-                    |> newState
-          }
-        , cmd
-        )
-
-    else
-        ( model, Cmd.none )
+        _ ->
+            ( model, Cmd.none )
 
 
-newState : Model -> State
+newState : Model -> Model
 newState model =
     if model.hero.hp <= 0 then
-        GameOver
+        { model | state = GameOver }
+
+    else if List.isEmpty model.enemies then
+        case model.state of
+            Playing ->
+                { model | state = Cleared }
+
+            _ ->
+                model
 
     else
-        Playing
+        model
