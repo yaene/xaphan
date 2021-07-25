@@ -11,6 +11,7 @@ type ModalType
     | ClearedMessage
     | WonMessage
     | LostMessage
+    | ControlsInfo
 
 
 drawModal : ModalType -> Html Msg
@@ -32,6 +33,13 @@ drawModal modalType =
 
         LostMessage ->
             drawModal_ "Game Over :-(" "Better luck next time!" [ ( "Try again", Retry ) ]
+
+        ControlsInfo ->
+            drawModal_ "Controls"
+                ("Move with arrow keys (or WASD) and shoot with Z (or SPACE). "
+                    ++ "Dodge the enemies bullets and kill them with yours to win!"
+                )
+                [ ( "Ok", Reset ) ]
 
 
 drawModal_ : String -> String -> List ( String, Msg ) -> Html Msg

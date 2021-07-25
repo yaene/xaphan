@@ -32,6 +32,7 @@ type State
     | Playing
     | Paused
     | Cleared
+    | Controls
     | GameOver
 
 
@@ -80,15 +81,20 @@ view model =
 
                 GameOver ->
                     [ drawModal LostMessage ]
+
+                Controls ->
+                    [ drawModal ControlsInfo ]
     in
     Html.div
         [ HtmlAttr.style "display" "flex"
         , HtmlAttr.style "justify-content" "center"
         ]
         [ Html.div
-            [ HtmlAttr.style "width" "100vh"
+            [ HtmlAttr.style "display" "flex"
+            , HtmlAttr.style "width" "100vh"
             , HtmlAttr.style "height" "100vh"
             , HtmlAttr.style "background-color" "gray"
+            , HtmlAttr.style "justify-content" "center"
             ]
             content
         ]
@@ -96,7 +102,17 @@ view model =
 
 drawInitialPage : Html Msg
 drawInitialPage =
-    div [] [ button [ onClick NextLevel ] [ text "New Game" ] ]
+    div
+        [ HtmlAttr.style "display" "flex"
+        , HtmlAttr.style "flex-direction" "column"
+        , HtmlAttr.style "align-self" "center"
+        , HtmlAttr.style "width" "250px"
+        , HtmlAttr.style "height" "80px"
+        , HtmlAttr.style "justify-content" "space-evenly"
+        ]
+        [ button [ onClick NextLevel ] [ text "New Game" ]
+        , button [ onClick ShowControls ] [ text "Controls" ]
+        ]
 
 
 subscriptions : Model -> Sub Msg
@@ -210,12 +226,18 @@ update msg model =
         Resume ->
             ( { model | state = Playing }, Cmd.none )
 
+        Reset ->
+            init ()
+
         Retry ->
             let
                 ( newModel, _ ) =
                     init ()
             in
             ( { newModel | enemies = loadLevel <| model.level, level = model.level }, Cmd.none )
+
+        ShowControls ->
+            ( { model | state = Controls }, Cmd.none )
 
         Noop ->
             ( model, Cmd.none )
