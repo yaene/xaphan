@@ -90,6 +90,7 @@ collideBulletsHero ({ hero, enemyBullets } as model) =
         model
 
 
+
 reduceEnemyHealth : Enemy -> List HeroBullet -> Enemy
 reduceEnemyHealth enemy heroBullets =
     if isEnemyHit enemy heroBullets then

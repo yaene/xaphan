@@ -1,0 +1,77 @@
+\documentclass[12pt]{article}
+\usepackage{mathtools}
+\usepackage{array,float,longtable}
+\usepackage{datenumber,calc,forloop,xstring}
+\usepackage{readarray}[2016-11-07]
+\usepackage{newtxtext}
+\usepackage{adjustbox}
+\usepackage{ifxetex}
+\newcommand{\twodigits}[1]{\ifnum#1<10 0\fi#1}
+\ifxetex
+\usepackage{fontspec}
+\setmainfont{StanleyMoon.ttf}
+\setsansfont{orange juice 2.0.ttf}
+\setmonofont{Belinda Heylove.ttf}
+\newfontfamily\fontAfamily{StanleyMoon.ttf} %subtitle
+\newfontfamily\fontBfamily{IMFeENsc28P.ttf} %title
+\fi
+\usepackage{geometry}
+\geometry{a4paper, margin=0in, landscape}
+
+\usepackage{eso-pic}
+\usepackage{tikz}
+\usetikzlibrary{shadings,calc,positioning}
+\usetikzlibrary{calc,trees,positioning,arrows,chains,shapes.geometric,  decorations.pathreplacing,decorations.pathmorphing,shapes,  matrix,shapes.symbols}
+\definecolor{JIBlue}{HTML}{0B2B52}
+\definecolor{blueWhite}{HTML}{F0F0FF}
+\definecolor{blueWhite}{HTML}{000000}
+\newcommand\BackgroundPic[1]{
+	\put(-5,0){
+		\parbox[b][\paperheight]{\paperwidth}{%
+			\vfill
+			\centering
+			\includegraphics[width=\paperwidth,height=\paperheight]{#1}
+			\vfill
+}}}
+
+\begin{document}
+\fontsize{12pt}{14pt}\selectfont
+\AddToShipoutPicture*{\BackgroundPic{Poster_Background.png}}%add the background picture
+%offset the margins. Essentially -> hspace moves to right, vspace moves down, negative values move in the opposite direction
+\vspace*{-16pt}
+\hspace*{-25pt}
+\begin{tikzpicture}
+	\node[color=red] at (0,0) {};
+	\node[color=red] at (\paperwidth-40pt,-\paperheight+30pt) {};
+
+	\node at (50.5pt,-37pt) {\includegraphics[width=70pt]{JI_1.pdf}};
+	\node at (130.5pt,-37pt) {\includegraphics[width=55pt]{SFOCS.pdf}};
+	\node at (773.5pt,-37pt)
+	{\includegraphics[width=45pt,scale=0.1]{Logo.jpg}};
+
+	%\node[color=white] at (157.5pt,-50pt) {SILVERFOCS};
+	%\draw[color=white] (117pt,-59pt) -- (197pt,-59pt);
+	%\node[color=white] at (157.5pt,-68pt) { VG100};
+	
+	%Title
+	\node[color=white,scale=2.8] at (196.0pt,-145pt) {\fontBfamily\Huge XAPHAN};
+    
+    \node[color=white,scale=1.2] at (448pt,-68pt) {\fontBfamily\Large About Xaphan};
+    \node[text width=7.1cm,color=white] at (485pt,-144pt) {Steam Tag: Action and Indie\\Xaphan is a bullet hell (danmaku) shoot'em up game with a focus on shooting experience. The player will encounter monsters and powerful bosses on the journey. Beware of the approaching threats, and destroy them to progress to the next level!};
+    
+	\node[color=white,scale=1.2] at (654pt,-68pt) {\fontBfamily\Large The Story};
+	\node[text width=7.1cm,color=white] at (712pt,-157pt) {Xaphan is a demon who rebeled the heaven. During the rebellion, he proposed to set heaven on fire, and his wild ambition lead him to also set our beautiful earth on fire with his monster army.\\You are a firefighter hero who has the ability to save the earth! Please kill all monsters and bring our beautiful Earth back!};
+	
+    \node[color=white,scale=1.2] at (93pt,-265pt) {\fontBfamily\Large Achievements};
+    \node[text width=7.1cm,color=white] at (130pt,-400pt) {Technical:\\- Learned functional programming with Elm\\- Learned professional way of version control\\- Practiced good coding quality and habits\\\quad\\Technical Communication:\\- Learned drawing and creating small animations using Procreate\\- Practiced team cooperation and communication)\\- Learned game design (story, visuals, the poster, the booklet, etc.)\\- Practiced poster design using LaTeX};
+    
+	\node[color=white,scale=1.2] at (322pt,-265pt) {\fontBfamily\Large Game Features};
+	\node[text width=7.1cm,color=white] at (353pt,-350pt) {- Three levels with increasing difficulties\\- Different Monsters: shoot bullets to the hero\\- Hero: attack monsters with normal attack and superpowers\\- Choices of superpowers\\- Elude monsters’ attack and kill monsters};
+	
+	\node[color=white,scale=1.2] at (560pt,-265pt) {\fontBfamily\Large Developer's Notes};
+	\node[text width=7.1cm,color=white] at (578pt,-359pt) {Commendable:\\- Spent lots of time on nice visuals\\- Improved a lot on the usage of Git\\- Worked hard on communication (online and offline)\\\quad\\Improvement Needed\\- Better division of work required\\- Better schedule needed (always behind)};
+	
+	\node at (755pt,-380pt) {\includegraphics{Boss.png}};
+
+\end{tikzpicture}
+\end{document}

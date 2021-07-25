@@ -12,7 +12,9 @@ type Msg
     | HeroShootBullet
     | ChangeEnemyDir ( Int, Dir )
     | NextLevel
+    | ShowControls
     | Pause
     | Resume
+    | Reset
     | Retry
     | Noop

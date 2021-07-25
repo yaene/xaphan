@@ -6,9 +6,9 @@ import Collision exposing (checkCollision)
 import Dir exposing (Dir(..))
 import Enemy exposing (Enemy, EnemyBullet, animateEnemies, changeDirCmds, changeEnemyDir, drawBullets, drawEnemies)
 import Hero exposing (..)
-import Html
+import Html exposing (Html, button, div, text)
 import Html.Attributes as HtmlAttr
-import Html.Events exposing (keyCode)
+import Html.Events exposing (keyCode, onClick)
 import Json.Decode
 import Levels exposing (Level, loadLevel)
 import Messages exposing (Msg(..))
@@ -28,9 +28,11 @@ type alias Model =
 
 
 type State
-    = Playing
+    = Initial
+    | Playing
     | Paused
     | Cleared
+    | Controls
     | GameOver
 
 
@@ -46,7 +48,7 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model (Hero.init ()) [] (loadLevel 1) [] 1 Playing, Cmd.none )
+    ( Model (Hero.init ()) [] [] [] 0 Initial, Cmd.none )
 
 
 view : Model -> Html.Html Msg
@@ -54,6 +56,9 @@ view model =
     let
         content =
             case model.state of
+                Initial ->
+                    [ drawInitialPage ]
+
                 Playing ->
                     [ Svg.svg
                         [ SvgAttr.height "99%"
@@ -76,17 +81,37 @@ view model =
 
                 GameOver ->
                     [ drawModal LostMessage ]
+
+                Controls ->
+                    [ drawModal ControlsInfo ]
     in
     Html.div
         [ HtmlAttr.style "display" "flex"
         , HtmlAttr.style "justify-content" "center"
         ]
         [ Html.div
-            [ HtmlAttr.style "width" "100vh"
+            [ HtmlAttr.style "display" "flex"
+            , HtmlAttr.style "width" "100vh"
             , HtmlAttr.style "height" "100vh"
             , HtmlAttr.style "background-color" "gray"
+            , HtmlAttr.style "justify-content" "center"
             ]
             content
+        ]
+
+
+drawInitialPage : Html Msg
+drawInitialPage =
+    div
+        [ HtmlAttr.style "display" "flex"
+        , HtmlAttr.style "flex-direction" "column"
+        , HtmlAttr.style "align-self" "center"
+        , HtmlAttr.style "width" "250px"
+        , HtmlAttr.style "height" "80px"
+        , HtmlAttr.style "justify-content" "space-evenly"
+        ]
+        [ button [ onClick NextLevel ] [ text "New Game" ]
+        , button [ onClick ShowControls ] [ text "Controls" ]
         ]
 
 
@@ -136,6 +161,14 @@ key on keycode =
 
         -- key: z
         90 ->
+            if on then
+                HeroShootBullet
+
+            else
+                Noop
+
+        -- key: SPACE
+        32 ->
             if on then
                 HeroShootBullet
 
@@ -201,12 +234,18 @@ update msg model =
         Resume ->
             ( { model | state = Playing }, Cmd.none )
 
+        Reset ->
+            init ()
+
         Retry ->
             let
                 ( newModel, _ ) =
                     init ()
             in
-            ( { newModel | enemies = loadLevel <| model.level, level = model.level }, Cmd.none )
+            ( { newModel | enemies = loadLevel <| model.level, level = model.level, state = Playing }, Cmd.none )
+
+        ShowControls ->
+            ( { model | state = Controls }, Cmd.none )
 
         Noop ->
             ( model, Cmd.none )
