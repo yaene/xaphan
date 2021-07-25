@@ -167,6 +167,14 @@ key on keycode =
             else
                 Noop
 
+        -- key: SPACE
+        32 ->
+            if on then
+                HeroShootBullet
+
+            else
+                Noop
+
         -- key: ESC
         27 ->
             Pause
