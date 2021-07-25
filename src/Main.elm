@@ -242,7 +242,7 @@ update msg model =
                 ( newModel, _ ) =
                     init ()
             in
-            ( { newModel | enemies = loadLevel <| model.level, level = model.level }, Cmd.none )
+            ( { newModel | enemies = loadLevel <| model.level, level = model.level, state = Playing }, Cmd.none )
 
         ShowControls ->
             ( { model | state = Controls }, Cmd.none )
