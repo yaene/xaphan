@@ -6,9 +6,9 @@ import Collision exposing (checkCollision)
 import Dir exposing (Dir(..))
 import Enemy exposing (Enemy, EnemyBullet, animateEnemies, changeDirCmds, changeEnemyDir, drawBullets, drawEnemies)
 import Hero exposing (..)
-import Html
+import Html exposing (Html, button, div, text)
 import Html.Attributes as HtmlAttr
-import Html.Events exposing (keyCode)
+import Html.Events exposing (keyCode, onClick)
 import Json.Decode
 import Levels exposing (Level, loadLevel)
 import Messages exposing (Msg(..))
@@ -28,7 +28,8 @@ type alias Model =
 
 
 type State
-    = Playing
+    = Initial
+    | Playing
     | Paused
     | Cleared
     | GameOver
@@ -46,7 +47,7 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model (Hero.init ()) [] (loadLevel 1) [] 1 Playing, Cmd.none )
+    ( Model (Hero.init ()) [] [] [] 0 Initial, Cmd.none )
 
 
 view : Model -> Html.Html Msg
@@ -54,6 +55,9 @@ view model =
     let
         content =
             case model.state of
+                Initial ->
+                    [ drawInitialPage ]
+
                 Playing ->
                     [ Svg.svg
                         [ SvgAttr.height "99%"
@@ -88,6 +92,11 @@ view model =
             ]
             content
         ]
+
+
+drawInitialPage : Html Msg
+drawInitialPage =
+    div [] [ button [ onClick NextLevel ] [ text "New Game" ] ]
 
 
 subscriptions : Model -> Sub Msg
