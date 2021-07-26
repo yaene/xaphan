@@ -95,7 +95,7 @@ deactivateAtkDouble elapsed model =
 
     else if nElapsed > 5000 then
         { model
-            | hero = acoiufbev (deAtkDouble model.hero) nElapsed
+            | hero = acoiufbev (deAtkDouble model.hero) 0
         }
 
     else
