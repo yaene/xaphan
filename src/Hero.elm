@@ -1,4 +1,4 @@
-module Hero exposing (Hero, HeroBullet, animateHero, animateHeroBullets, bulletHeight, bulletWidth, drawHero, drawHeroBullets, heroHeight, heroWidth, init, moveHero, shootBullet, startMove)
+module Hero exposing (Hero, HeroBullet, animateHero, animateHeroBullets, bulletHeight, bulletWidth, drawHero, drawHeroBullets, heroHeight, heroWidth, init, moveHero, selectSuperPower, shootBullet, startMove)
 
 import Dir exposing (Dir(..))
 import Field exposing (Pos, moveBy)
@@ -15,6 +15,7 @@ type alias Hero =
     , moveUp : Bool
     , moveDown : Bool
     , heroDir : Dir
+    , spSelection : Int
     }
 
 
@@ -62,7 +63,7 @@ heroSpeed =
 
 init : () -> Hero
 init _ =
-    Hero ( 500, 800 ) 3 False False False False None
+    Hero ( 500, 800 ) 3 False False False False None 0
 
 
 animateHero :
@@ -234,3 +235,8 @@ drawHeroBullet bullet =
         , SvgAttr.height <| String.fromInt bulletHeight
         ]
         []
+
+
+selectSuperPower : Hero -> Int
+selectSuperPower hero =
+    hero.spSelection

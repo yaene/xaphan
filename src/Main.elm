@@ -134,6 +134,10 @@ key on keycode =
         87 ->
             MoveHeroUp on
 
+        --key: x
+        88 ->
+            HeroUseSuperpower
+
         -- key: z
         90 ->
             if on then
@@ -181,6 +185,9 @@ update msg model =
             ( { model | heroBullets = shootBullet hero :: model.heroBullets }
             , Cmd.none
             )
+
+        HeroUseSuperpower ->
+            ( model |> useSuperPower, Cmd.none )
 
         Tick elapsed ->
             model |> animate elapsed
@@ -242,3 +249,23 @@ newState model =
 
     else
         model
+
+
+useSuperPower : Model -> Model
+useSuperPower model =
+    let
+        selection =
+            selectSuperPower model.hero
+    in
+    case selection of
+        1 ->
+            model
+
+        2 ->
+            model
+
+        3 ->
+            model
+
+        _ ->
+            model
