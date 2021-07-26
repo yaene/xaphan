@@ -13,7 +13,9 @@ type Msg
     | HeroUseSuperpower
     | ChangeEnemyDir ( Int, Dir )
     | NextLevel
+    | ShowControls
     | Pause
     | Resume
+    | Reset
     | Retry
     | Noop
