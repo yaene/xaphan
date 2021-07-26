@@ -196,6 +196,9 @@ update msg model =
     let
         hero =
             model.hero
+
+        atkDoubled =
+            model.hero.atkDoubled
     in
     case msg of
         MoveHeroLeft on ->
@@ -219,9 +222,15 @@ update msg model =
             )
 
         HeroShootBullet ->
-            ( { model | heroBullets = shootBullet hero :: model.heroBullets }
-            , Cmd.none
-            )
+            if atkDoubled then
+                ( { model | heroBullets = shootBullet hero :: shootBullet hero :: model.heroBullets }
+                , Cmd.none
+                )
+
+            else
+                ( { model | heroBullets = shootBullet hero :: model.heroBullets }
+                , Cmd.none
+                )
 
         HeroUseSuperpower ->
             ( model |> useSuperPower, Cmd.none )
@@ -314,7 +323,7 @@ useSuperPower model =
             { model | enemyBullets = spClearBullets model.enemyBullets model.hero, hero = model.hero |> Hero.useSuperpower }
 
         2 ->
-            model
+            { model | hero = model.hero |> atkDouble |> Hero.useSuperpower }
 
         3 ->
             model

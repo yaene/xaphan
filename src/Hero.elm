@@ -1,8 +1,9 @@
-module Hero exposing (Hero, HeroBullet, animateHero, animateHeroBullets, bulletHeight, bulletWidth, drawHero, drawHeroBullets, heroHeight, heroWidth, init, moveHero, selectSuperPower, setSuperpower, shootBullet, startMove, useSuperpower)
+module Hero exposing (Hero, HeroBullet, animateHero, animateHeroBullets, atkDouble, bulletHeight, bulletWidth, drawHero, drawHeroBullets, heroHeight, heroWidth, init, moveHero, selectSuperPower, setSuperpower, shootBullet, startMove, useSuperpower)
 
 import Dir exposing (Dir(..))
 import Field exposing (Pos, moveBy)
 import Messages exposing (Msg(..))
+import Modals exposing (ModalType)
 import Svg exposing (Svg)
 import Svg.Attributes as SvgAttr
 
@@ -17,6 +18,8 @@ type alias Hero =
     , heroDir : Dir
     , spSelection : Int
     , spInstance : Int
+    , spElapsed : Int
+    , atkDoubled : Bool
     }
 
 
@@ -64,17 +67,44 @@ heroSpeed =
 
 init : () -> Hero
 init _ =
-    Hero ( 500, 800 ) 3 False False False False None 0 3
+    Hero ( 500, 800 ) 3 False False False False None 0 3 0 False
 
 
 animateHero :
     Float
     -> { a | hero : Hero, heroBullets : List HeroBullet }
     -> { a | hero : Hero, heroBullets : List HeroBullet }
-animateHero _ model =
+animateHero elapsed model =
     model
         |> moveHero
         |> animateHeroBullets
+        |> deactivateAtkDouble elapsed
+
+
+deactivateAtkDouble : Float -> { a | hero : Hero, heroBullets : List HeroBullet } -> { a | hero : Hero, heroBullets : List HeroBullet }
+deactivateAtkDouble elapsed model =
+    let
+        atkDoubled =
+            model.hero.atkDoubled
+
+        nElapsed =
+            model.hero.spElapsed
+    in
+    if atkDoubled == False then
+        model
+
+    else if nElapsed > 5000 then
+        { model
+            | hero = acoiufbev (deAtkDouble model.hero) nElapsed
+        }
+
+    else
+        { model | hero = acoiufbev model.hero nElapsed }
+
+
+acoiufbev : Hero -> Int -> Hero
+acoiufbev hero nElapsed =
+    { hero | spElapsed = nElapsed }
 
 
 drawHero : Hero -> Svg msg
@@ -251,3 +281,13 @@ setSuperpower hero selection =
 useSuperpower : Hero -> Hero
 useSuperpower hero =
     { hero | spInstance = hero.spInstance - 1 }
+
+
+atkDouble : Hero -> Hero
+atkDouble hero =
+    { hero | atkDoubled = True }
+
+
+deAtkDouble : Hero -> Hero
+deAtkDouble hero =
+    { hero | atkDoubled = False }

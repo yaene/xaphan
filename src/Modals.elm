@@ -42,7 +42,7 @@ drawModal modalType =
                 )
                 [ ( "Ok", Reset ) ]
         SelectionPage ->
-            drawModal_ "Select the superpower you want to use" "Superpower 1: clear all enemy bullets\nSuperpower 2: (yet to decide)" [("Superpower 1", SelectSuperpower1),("Superpower 2", SelectSuperpower2)]
+            drawModal_ "Select the superpower you want to use" "Superpower 1: clear all enemy bullets\nSuperpower 2: Hero ATK double for 5 seconds" [("Superpower 1", SelectSuperpower1),("Superpower 2", SelectSuperpower2)]
         
 
 
