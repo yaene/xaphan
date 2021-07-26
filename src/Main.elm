@@ -259,7 +259,7 @@ useSuperPower model =
     in
     case selection of
         1 ->
-            model
+            { model | enemyBullets = model.enemyBullets |> spClearBullets model.hero }
 
         2 ->
             model
@@ -269,3 +269,8 @@ useSuperPower model =
 
         _ ->
             model
+
+
+spClearBullets : List EnemyBullet -> Hero -> List EnemyBullet
+spClearBullets enemyBullets hero =
+    []
