@@ -1,4 +1,4 @@
-module Hero exposing (Hero, HeroBullet, animateHero, animateHeroBullets, bulletHeight, bulletWidth, drawHero, drawHeroBullets, heroHeight, heroWidth, init, moveHero, selectSuperPower, shootBullet, startMove)
+module Hero exposing (Hero, HeroBullet, animateHero, animateHeroBullets, bulletHeight, bulletWidth, drawHero, drawHeroBullets, heroHeight, heroWidth, init, moveHero, selectSuperPower, shootBullet, startMove, useSuperpower)
 
 import Dir exposing (Dir(..))
 import Field exposing (Pos, moveBy)
@@ -241,3 +241,8 @@ drawHeroBullet bullet =
 selectSuperPower : Hero -> Int
 selectSuperPower hero =
     hero.spSelection
+
+
+useSuperpower : Hero -> Hero
+useSuperpower hero =
+    { hero | spInstance = hero.spInstance - 1 }
