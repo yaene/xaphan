@@ -16,6 +16,7 @@ type alias Hero =
     , moveDown : Bool
     , heroDir : Dir
     , spSelection : Int
+    , spInstance : Int
     }
 
 
@@ -63,7 +64,7 @@ heroSpeed =
 
 init : () -> Hero
 init _ =
-    Hero ( 500, 800 ) 3 False False False False None 0
+    Hero ( 500, 800 ) 3 False False False False None 0 3
 
 
 animateHero :

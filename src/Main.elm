@@ -273,4 +273,12 @@ useSuperPower model =
 
 spClearBullets : List EnemyBullet -> Hero -> List EnemyBullet
 spClearBullets enemyBullets hero =
-    []
+    let
+        ins =
+            hero.spInstance
+    in
+    if ins > 0 then
+        []
+
+    else
+        enemyBullets
