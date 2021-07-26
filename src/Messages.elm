@@ -14,6 +14,9 @@ type Msg
     | ChangeEnemyDir ( Int, Dir )
     | NextLevel
     | ShowControls
+    | Selecting
+    | SelectSuperpower1
+    | SelectSuperpower2
     | Pause
     | Resume
     | Reset

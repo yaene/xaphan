@@ -33,6 +33,7 @@ type State
     | Paused
     | Cleared
     | Controls
+    | Selects
     | GameOver
 
 
@@ -84,6 +85,9 @@ view model =
 
                 Controls ->
                     [ drawModal ControlsInfo ]
+
+                Selects ->
+                    [ drawModal SelectionPage ]
     in
     Html.div
         [ HtmlAttr.style "display" "flex"
@@ -110,7 +114,7 @@ drawInitialPage =
         , HtmlAttr.style "height" "80px"
         , HtmlAttr.style "justify-content" "space-evenly"
         ]
-        [ button [ onClick NextLevel ] [ text "New Game" ]
+        [ button [ onClick Messages.Selecting ] [ text "New Game" ]
         , button [ onClick ShowControls ] [ text "Controls" ]
         ]
 
@@ -243,6 +247,15 @@ update msg model =
 
         Reset ->
             init ()
+
+        Selecting ->
+            ( { model | state = Selects }, Cmd.none )
+
+        SelectSuperpower1 ->
+            ( { model | hero = setSuperpower model.hero 1, state = Playing }, Cmd.none )
+
+        SelectSuperpower2 ->
+            ( { model | hero = setSuperpower model.hero 2, state = Playing }, Cmd.none )
 
         Retry ->
             let
