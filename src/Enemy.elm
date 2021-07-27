@@ -272,7 +272,7 @@ drawEnemy enemy =
     Svg.use
         [ SvgAttr.x <| String.fromInt x
         , SvgAttr.y <| String.fromInt y
-        , SvgAttr.xlinkHref "../assets/monster.svg#monster"
+        , SvgAttr.xlinkHref "assets/monster.svg#monster"
         , SvgAttr.width <| String.fromInt enemyWidth
         , SvgAttr.height <| String.fromInt enemyHeight
         ]
