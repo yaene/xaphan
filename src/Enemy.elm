@@ -12,6 +12,7 @@ module Enemy exposing
     , enemyWidth
     , finalBoss
     , newBasicEnemy
+    , newSpiralEnemy
     , newSunEnemy
     )
 
@@ -43,6 +44,7 @@ type EnemyType
     = Basic
     | Sun
     | Final
+    | Spiral
 
 
 type alias Enemy =
@@ -68,6 +70,19 @@ newBasicEnemy pos dir =
 newSunEnemy : Pos -> Dir -> Enemy
 newSunEnemy pos dir =
     Enemy pos 5 dir (newAnimation 1500 0) (newAnimation 1000 0) Sun Nothing
+
+
+newSpiralEnemy : Pos -> Dir -> Float -> Enemy
+newSpiralEnemy pos dir startElapsed =
+    Enemy pos
+        5
+        dir
+        (newAnimation 1500 0)
+        (Animation startElapsed 1500 False True 0 0)
+        Spiral
+    <|
+        Just <|
+            newAnimation 20 20
 
 
 finalBoss : Pos -> Dir -> Enemy
@@ -223,11 +238,42 @@ animateShootBullet elapsed enemy_ =
         Final ->
             animateFinalBoss elapsed enemy
 
+        Spiral ->
+            animateSpiralEnemy elapsed enemy
+
         Basic ->
             ( enemy, triggerShoot newAnimation enemy.pos shootBullet )
 
         Sun ->
             ( enemy, triggerShoot newAnimation enemy.pos shootSunBullets )
+
+
+animateSpiralEnemy : Float -> Enemy -> ( Enemy, List EnemyBullet )
+animateSpiralEnemy elapsed enemy =
+    let
+        mainAnimation =
+            enemy.triggerShootAnimation
+    in
+    case enemy.subShootAnimation of
+        Just sub ->
+            let
+                newSub =
+                    if sub.isActive then
+                        updateAnimation sub elapsed
+
+                    else if mainAnimation.shouldTrigger then
+                        { sub | isActive = True }
+
+                    else
+                        sub
+
+                newBullets =
+                    triggerShoot sub enemy.pos (shootSpiralBullet sub.triggerCount)
+            in
+            ( { enemy | subShootAnimation = Just newSub }, newBullets )
+
+        Nothing ->
+            ( enemy, [] )
 
 
 animateFinalBoss : Float -> Enemy -> ( Enemy, List EnemyBullet )

@@ -1,7 +1,7 @@
 module Levels exposing (Level, drawClearedLevel, loadLevel)
 
 import Dir exposing (Dir(..))
-import Enemy exposing (Enemy, finalBoss, newBasicEnemy, newSunEnemy)
+import Enemy exposing (Enemy, finalBoss, newBasicEnemy, newSpiralEnemy, newSunEnemy)
 import Html exposing (Html)
 import Messages exposing (Msg(..))
 import Modals exposing (ModalType(..), drawModal)
@@ -24,9 +24,17 @@ loadLevel level =
             ]
 
         2 ->
-            [ newSunEnemy ( 500, 200 ) Left ]
+            [ newSunEnemy ( 200, 100 ) Right
+            , newSunEnemy ( 500, 200 ) Left
+            , newSunEnemy ( 100, 300 ) Right
+            ]
 
         3 ->
+            [ newSpiralEnemy ( 800, 100 ) Left -700
+            , newSpiralEnemy ( 100, 300 ) Right 0
+            ]
+
+        4 ->
             [ finalBoss ( 50, 50 ) Right ]
 
         _ ->
@@ -36,7 +44,7 @@ loadLevel level =
 drawClearedLevel : Level -> List (Html Msg)
 drawClearedLevel level =
     case level of
-        3 ->
+        4 ->
             [ drawModal WonMessage ]
 
         _ ->
