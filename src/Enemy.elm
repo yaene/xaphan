@@ -28,7 +28,7 @@ enemyWidth =
 
 
 enemyHeight =
-    100
+    80
 
 
 bulletWidth =
@@ -269,10 +269,10 @@ drawEnemy enemy =
         ( x, y ) =
             enemy.pos
     in
-    rect
+    Svg.use
         [ SvgAttr.x <| String.fromInt x
         , SvgAttr.y <| String.fromInt y
-        , SvgAttr.fill "orange"
+        , SvgAttr.xlinkHref "../assets/monster.svg#monster"
         , SvgAttr.width <| String.fromInt enemyWidth
         , SvgAttr.height <| String.fromInt enemyHeight
         ]
