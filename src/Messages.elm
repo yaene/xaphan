@@ -15,8 +15,7 @@ type Msg
     | NextLevel
     | ShowControls
     | Selecting
-    | SelectSuperpower1
-    | SelectSuperpower2
+    | SelectSuperpower Int
     | Pause
     | Resume
     | Reset

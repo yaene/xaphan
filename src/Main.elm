@@ -260,11 +260,8 @@ update msg model =
         Selecting ->
             ( { model | state = Selects }, Cmd.none )
 
-        SelectSuperpower1 ->
-            ( { model | hero = setSuperpower model.hero 1, state = Playing }, Cmd.none )
-
-        SelectSuperpower2 ->
-            ( { model | hero = setSuperpower model.hero 2, state = Playing }, Cmd.none )
+        SelectSuperpower power ->
+            ( { model | hero = setSuperpower model.hero power, state = Playing, enemies = loadLevel <| model.level + 1, level = model.level + 1 }, Cmd.none )
 
         Retry ->
             let
