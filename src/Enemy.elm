@@ -72,7 +72,7 @@ newSunEnemy pos dir =
 
 finalBoss : Pos -> Dir -> Enemy
 finalBoss pos dir =
-    Enemy pos 10 dir (newAnimation 1500 0) (newAnimation 1000 0) Final <| Just <| newAnimation 20 20
+    Enemy pos 10 dir (newAnimation 1500 0) (newAnimation 1000 0) Final Nothing
 
 
 finalBossShootBullet : Int -> Pos -> List EnemyBullet
@@ -231,19 +231,31 @@ animateShootBullet elapsed enemy_ =
 
 
 animateFinalBoss : Float -> Enemy -> ( Enemy, List EnemyBullet )
-animateFinalBoss elapsed enemy =
+animateFinalBoss elapsed enemy_ =
+    let
+        { triggerShootAnimation } =
+            enemy_
+
+        enemy =
+            if triggerShootAnimation.shouldTrigger then
+                case triggerShootAnimation.triggerCount |> modBy 2 of
+                    0 ->
+                        { enemy_ | subShootAnimation = Just <| newAnimation 20 20 }
+
+                    1 ->
+                        { enemy_ | subShootAnimation = Nothing }
+
+                    _ ->
+                        enemy_
+
+            else
+                enemy_
+    in
     case enemy.subShootAnimation of
         Just sub ->
             let
                 newSub =
-                    if sub.isActive then
-                        updateAnimation sub elapsed
-
-                    else if enemy.triggerShootAnimation.shouldTrigger then
-                        { sub | isActive = True }
-
-                    else
-                        sub
+                    updateAnimation sub elapsed
 
                 newBullets =
                     triggerShoot sub enemy.pos (shootSpiralBullet sub.triggerCount)
@@ -251,7 +263,7 @@ animateFinalBoss elapsed enemy =
             ( { enemy | subShootAnimation = Just newSub }, newBullets )
 
         Nothing ->
-            ( enemy, [] )
+            ( enemy, triggerShoot triggerShootAnimation enemy.pos shootSunBullets )
 
 
 triggerShoot : Animation -> Pos -> (Pos -> List EnemyBullet) -> List EnemyBullet
