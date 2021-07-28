@@ -19,6 +19,7 @@ module Enemy exposing
 import Animation exposing (Animation, newAnimation, updateAnimation)
 import Dir exposing (Dir(..))
 import Field exposing (Pos, inBoundsX, moveBy)
+import Hero exposing (shootBullet)
 import Messages exposing (Msg(..))
 import Svg exposing (Svg, rect)
 import Svg.Attributes as SvgAttr
@@ -47,6 +48,12 @@ type EnemyType
     | Spiral
 
 
+type alias SubShootAnimation =
+    { shootFunc : Int -> Pos -> List EnemyBullet
+    , animation : Animation
+    }
+
+
 type alias Enemy =
     { pos : Pos
     , hp : Int
@@ -54,7 +61,7 @@ type alias Enemy =
     , changeDirAnimation : Animation
     , triggerShootAnimation : Animation
     , enemyType : EnemyType
-    , subShootAnimation : Maybe Animation
+    , subShootAnimation : Maybe SubShootAnimation
     }
 
 
@@ -82,7 +89,8 @@ newSpiralEnemy pos dir startElapsed =
         Spiral
     <|
         Just <|
-            newAnimation 20 20
+            SubShootAnimation shootSpiralBullet <|
+                newAnimation 20 20
 
 
 finalBoss : Pos -> Dir -> Enemy
@@ -183,8 +191,8 @@ shootSunBullets shooterPos =
             )
 
 
-shootBullet : Pos -> List EnemyBullet
-shootBullet shooterPos =
+shootBullet : Int -> Pos -> List EnemyBullet
+shootBullet _ shooterPos =
     [ EnemyBullet (moveBy ( round <| enemyWidth / 2, enemyHeight ) shooterPos) 0 5 ]
 
 
@@ -242,7 +250,7 @@ animateShootBullet elapsed enemy_ =
             animateSpiralEnemy elapsed enemy
 
         Basic ->
-            ( enemy, triggerShoot newAnimation enemy.pos shootBullet )
+            ( enemy, triggerShoot newAnimation enemy.pos <| shootBullet 0 )
 
         Sun ->
             ( enemy, triggerShoot newAnimation enemy.pos shootSunBullets )
@@ -255,8 +263,11 @@ animateSpiralEnemy elapsed enemy =
             enemy.triggerShootAnimation
     in
     case enemy.subShootAnimation of
-        Just sub ->
+        Just subShootAnimation ->
             let
+                sub =
+                    subShootAnimation.animation
+
                 newSub =
                     if sub.isActive then
                         updateAnimation sub elapsed
@@ -267,10 +278,13 @@ animateSpiralEnemy elapsed enemy =
                     else
                         sub
 
+                newSubShoot =
+                    { subShootAnimation | animation = newSub }
+
                 newBullets =
                     triggerShoot sub enemy.pos (shootSpiralBullet sub.triggerCount)
             in
-            ( { enemy | subShootAnimation = Just newSub }, newBullets )
+            ( { enemy | subShootAnimation = Just newSubShoot }, newBullets )
 
         Nothing ->
             ( enemy, [] )
@@ -284,12 +298,20 @@ animateFinalBoss elapsed enemy_ =
 
         enemy =
             if triggerShootAnimation.shouldTrigger then
-                case triggerShootAnimation.triggerCount |> modBy 2 of
+                case triggerShootAnimation.triggerCount |> modBy 3 of
                     0 ->
-                        { enemy_ | subShootAnimation = Just <| newAnimation 20 20 }
+                        { enemy_
+                            | subShootAnimation =
+                                Just <|
+                                    SubShootAnimation shootSpiralBullet <|
+                                        newAnimation 20 20
+                        }
 
                     1 ->
                         { enemy_ | subShootAnimation = Nothing }
+
+                    2 ->
+                        { enemy_ | subShootAnimation = Just <| SubShootAnimation shootBullet <| newAnimation 0 1 }
 
                     _ ->
                         enemy_
@@ -298,15 +320,15 @@ animateFinalBoss elapsed enemy_ =
                 enemy_
     in
     case enemy.subShootAnimation of
-        Just sub ->
+        Just { shootFunc, animation } ->
             let
                 newSub =
-                    updateAnimation sub elapsed
+                    updateAnimation animation elapsed
 
                 newBullets =
-                    triggerShoot sub enemy.pos (shootSpiralBullet sub.triggerCount)
+                    triggerShoot animation enemy.pos (shootFunc animation.triggerCount)
             in
-            ( { enemy | subShootAnimation = Just newSub }, newBullets )
+            ( { enemy | subShootAnimation = Just <| SubShootAnimation shootFunc newSub }, newBullets )
 
         Nothing ->
             ( enemy, triggerShoot triggerShootAnimation enemy.pos shootSunBullets )
