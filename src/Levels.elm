@@ -1,7 +1,7 @@
 module Levels exposing (Level, drawClearedLevel, loadLevel)
 
 import Dir exposing (Dir(..))
-import Enemy exposing (Enemy, finalBoss, newBasicEnemy, newSpiralEnemy, newSunEnemy)
+import Enemy exposing (Enemy, EnemyType(..), finalBoss, newBasicEnemy, newEnvironmentalEnemy, newSpiralEnemy, newSunEnemy)
 import Html exposing (Html)
 import Messages exposing (Msg(..))
 import Modals exposing (ModalType(..), drawModal)
@@ -35,7 +35,10 @@ loadLevel level =
             ]
 
         4 ->
-            [ finalBoss ( 50, 50 ) Right ]
+            [ finalBoss ( 50, 200 ) Right
+            , newEnvironmentalEnemy ( 300, -100 )
+            , newEnvironmentalEnemy ( 700, -100 )
+            ]
 
         _ ->
             []

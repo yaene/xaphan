@@ -39,12 +39,12 @@ type Dir
 
 heroWidth : Int
 heroWidth =
-    90
+    45
 
 
 heroHeight : Int
 heroHeight =
-    120
+    60
 
 
 bulletWidth =
@@ -57,7 +57,7 @@ bulletHeight =
 
 heroSpeed : number
 heroSpeed =
-    15
+    10
 
 
 init : () -> Hero

@@ -1,6 +1,7 @@
 module Enemy exposing
     ( Enemy
     , EnemyBullet
+    , EnemyType(..)
     , animateEnemies
     , bulletHeight
     , bulletWidth
@@ -12,6 +13,7 @@ module Enemy exposing
     , enemyWidth
     , finalBoss
     , newBasicEnemy
+    , newEnvironmentalEnemy
     , newSpiralEnemy
     , newSunEnemy
     )
@@ -46,6 +48,7 @@ type EnemyType
     | Sun
     | Final
     | Spiral
+    | Environmental
 
 
 type alias SubShootAnimation =
@@ -77,6 +80,11 @@ newBasicEnemy pos dir =
 newSunEnemy : Pos -> Dir -> Enemy
 newSunEnemy pos dir =
     Enemy pos 5 dir (newAnimation 1500 0) (newAnimation 1000 0) Sun Nothing
+
+
+newEnvironmentalEnemy : Pos -> Enemy
+newEnvironmentalEnemy pos =
+    Enemy pos 1 None (newAnimation 0 -1) (newAnimation 800 0) Environmental Nothing
 
 
 newSpiralEnemy : Pos -> Dir -> Float -> Enemy
@@ -265,6 +273,9 @@ animateShootBullet elapsed enemy_ =
 
         Sun ->
             ( enemy, triggerShoot newAnimation enemy.pos <| shootSunBullets 0 )
+
+        Environmental ->
+            ( enemy, triggerShoot newAnimation enemy.pos <| shootCircleBullets 0 )
 
 
 animateSpiralEnemy : Float -> Enemy -> ( Enemy, List EnemyBullet )
