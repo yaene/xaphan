@@ -60,6 +60,7 @@ type alias SubShootAnimation =
 type alias Enemy =
     { pos : Pos
     , hp : Int
+    , maxHp : Int
     , dir : Dir
     , changeDirAnimation : Animation
     , triggerShootAnimation : Animation
@@ -74,22 +75,23 @@ type alias EnemyBullet =
 
 newBasicEnemy : Pos -> Dir -> Enemy
 newBasicEnemy pos dir =
-    Enemy pos 5 dir (newAnimation 1500 0) (newAnimation 1000 0) Basic Nothing
+    Enemy pos 5 5 dir (newAnimation 1500 0) (newAnimation 1000 0) Basic Nothing
 
 
 newSunEnemy : Pos -> Dir -> Enemy
 newSunEnemy pos dir =
-    Enemy pos 5 dir (newAnimation 1500 0) (newAnimation 1000 0) Sun Nothing
+    Enemy pos 5 5 dir (newAnimation 1500 0) (newAnimation 1000 0) Sun Nothing
 
 
 newEnvironmentalEnemy : Pos -> Enemy
 newEnvironmentalEnemy pos =
-    Enemy pos 1 None (newAnimation 0 -1) (newAnimation 800 0) Environmental Nothing
+    Enemy pos 1 1 None (newAnimation 0 -1) (newAnimation 800 0) Environmental Nothing
 
 
 newSpiralEnemy : Pos -> Dir -> Float -> Enemy
 newSpiralEnemy pos dir startElapsed =
     Enemy pos
+        5
         5
         dir
         (newAnimation 1500 0)
@@ -103,7 +105,7 @@ newSpiralEnemy pos dir startElapsed =
 
 finalBoss : Pos -> Dir -> Enemy
 finalBoss pos dir =
-    Enemy pos 10 dir (newAnimation 1500 0) (newAnimation 1000 0) Final Nothing
+    Enemy pos 10 10 dir (newAnimation 1500 0) (newAnimation 1000 0) Final Nothing
 
 
 finalBossShootBullet : Int -> Pos -> List EnemyBullet
@@ -410,11 +412,39 @@ drawEnemy enemy =
         ( x, y ) =
             enemy.pos
     in
-    Svg.use
+    Svg.svg
         [ SvgAttr.x <| String.fromInt x
         , SvgAttr.y <| String.fromInt y
-        , SvgAttr.xlinkHref "assets/monster.svg#monster"
-        , SvgAttr.width <| String.fromInt enemyWidth
-        , SvgAttr.height <| String.fromInt enemyHeight
+        , SvgAttr.height <| String.fromInt <| enemyHeight + 5
         ]
-        []
+        [ Svg.use
+            [ SvgAttr.xlinkHref "assets/monster.svg#monster"
+            , SvgAttr.width <| String.fromInt enemyWidth
+            , SvgAttr.height <| String.fromInt enemyHeight
+            , SvgAttr.y <| String.fromInt 5
+            ]
+            []
+        , drawHpBar enemy.hp enemy.maxHp
+        ]
+
+
+drawHpBar : Int -> Int -> Svg Msg
+drawHpBar hp maxHp =
+    let
+        barWidth =
+            enemyWidth // maxHp
+
+        bars =
+            List.range 0 (hp - 1)
+                |> List.map
+                    (\i ->
+                        Svg.rect
+                            [ SvgAttr.width <| String.fromInt barWidth
+                            , SvgAttr.height <| String.fromInt 5
+                            , SvgAttr.fill "orange"
+                            , SvgAttr.x <| String.fromInt <| i * (barWidth + 1)
+                            ]
+                            []
+                    )
+    in
+    Svg.svg [] bars
