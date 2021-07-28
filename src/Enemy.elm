@@ -180,14 +180,25 @@ animateEnemyBullets model =
     { model | enemyBullets = newBullets }
 
 
-shootSunBullets : Pos -> List EnemyBullet
-shootSunBullets shooterPos =
+shootSunBullets : Int -> Pos -> List EnemyBullet
+shootSunBullets offset shooterPos =
     List.range 0 7
         |> List.map
             (\i ->
                 EnemyBullet (moveBy ( round <| enemyWidth / 2, round <| enemyHeight / 2 ) shooterPos)
-                    (round <| (15 * cos ((i |> toFloat) * pi / 4)))
-                    (round <| (15 * sin ((i |> toFloat) * pi / 4)))
+                    (round <| (15 * cos ((i |> toFloat) * pi / 4 + (offset |> toFloat) * pi / 10)))
+                    (round <| (15 * sin ((i |> toFloat) * pi / 4 + (offset |> toFloat) * pi / 10)))
+            )
+
+
+shootCircleBullets : Int -> Pos -> List EnemyBullet
+shootCircleBullets _ shooterPos =
+    List.range 0 15
+        |> List.map
+            (\i ->
+                EnemyBullet (moveBy ( round <| enemyWidth / 2, round <| enemyHeight / 2 ) shooterPos)
+                    (round <| (15 * cos ((i |> toFloat) * pi / 8)))
+                    (round <| (15 * sin ((i |> toFloat) * pi / 8)))
             )
 
 
@@ -253,7 +264,7 @@ animateShootBullet elapsed enemy_ =
             ( enemy, triggerShoot newAnimation enemy.pos <| shootBullet 0 )
 
         Sun ->
-            ( enemy, triggerShoot newAnimation enemy.pos shootSunBullets )
+            ( enemy, triggerShoot newAnimation enemy.pos <| shootSunBullets 0 )
 
 
 animateSpiralEnemy : Float -> Enemy -> ( Enemy, List EnemyBullet )
@@ -304,14 +315,14 @@ animateFinalBoss elapsed enemy_ =
                             | subShootAnimation =
                                 Just <|
                                     SubShootAnimation shootSpiralBullet <|
-                                        newAnimation 20 20
+                                        newAnimation 40 20
                         }
 
                     1 ->
-                        { enemy_ | subShootAnimation = Nothing }
+                        { enemy_ | subShootAnimation = Just <| SubShootAnimation shootSunBullets <| newAnimation 200 4 }
 
                     2 ->
-                        { enemy_ | subShootAnimation = Just <| SubShootAnimation shootBullet <| newAnimation 0 1 }
+                        { enemy_ | subShootAnimation = Just <| SubShootAnimation shootCircleBullets <| newAnimation 100 8 }
 
                     _ ->
                         enemy_
@@ -331,7 +342,7 @@ animateFinalBoss elapsed enemy_ =
             ( { enemy | subShootAnimation = Just <| SubShootAnimation shootFunc newSub }, newBullets )
 
         Nothing ->
-            ( enemy, triggerShoot triggerShootAnimation enemy.pos shootSunBullets )
+            ( enemy, [] )
 
 
 triggerShoot : Animation -> Pos -> (Pos -> List EnemyBullet) -> List EnemyBullet
