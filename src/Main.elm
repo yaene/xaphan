@@ -68,7 +68,7 @@ view model =
                         (drawHero model.hero
                             :: (drawEnemies model.enemies
                                     ++ drawBullets model.enemyBullets
-                                    ++ drawBullets model.heroBullets
+                                    ++ drawHeroBullets model.heroBullets
                                )
                         )
                     ]

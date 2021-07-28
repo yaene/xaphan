@@ -216,8 +216,8 @@ direction { moveLeft, moveRight, moveUp, moveDown } =
 
 
 drawHeroBullets : List HeroBullet -> List (Svg Msg)
-drawHeroBullets enemyBullets =
-    enemyBullets |> List.map drawHeroBullet
+drawHeroBullets heroBullets =
+    heroBullets |> List.map drawHeroBullet
 
 
 drawHeroBullet : HeroBullet -> Svg Msg
@@ -229,7 +229,7 @@ drawHeroBullet bullet =
     Svg.rect
         [ SvgAttr.x <| String.fromInt x
         , SvgAttr.y <| String.fromInt y
-        , SvgAttr.fill "green"
+        , SvgAttr.fill "blue"
         , SvgAttr.width <| String.fromInt bulletWidth
         , SvgAttr.height <| String.fromInt bulletHeight
         ]
