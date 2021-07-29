@@ -1,13 +1,34 @@
-module Hero exposing (Hero, HeroBullet, animateHero, animateHeroBullets, atkDouble, bulletHeight, bulletWidth, drawHero, drawHeroBullets, heroHeight, heroWidth, init, moveHero, selectSuperPower, setSuperpower, shootBullet, startMove, useSuperpower)
+module Hero exposing
+    ( Hero
+    , HeroBullet
+    , animateHero
+    , animateHeroBullets
+    , atkDouble
+    , bulletHeight
+    , bulletWidth
+    , drawHero
+    , drawHeroBullets
+    , heroHeight
+    , heroWidth
+    , init
+    , moveHero
+    , selectSuperPower
+    , setSuperpower
+    , shootBullet
+    , startMove
+    , useSuperpower
+    )
 
 import Dir exposing (Dir(..))
-import Field exposing (Pos, moveBy)
+import Field exposing (Pos, inBoundsDimensions, moveBy)
 import Messages exposing (Msg(..))
 import Modals exposing (ModalType)
 import Svg exposing (Svg)
 import Svg.Attributes as SvgAttr
 
 
+{-| contains all the data for animating the hero
+-}
 type alias Hero =
     { pos : Pos
     , hp : Int
@@ -23,6 +44,8 @@ type alias Hero =
     }
 
 
+{-| contains all the data for animating a hero bullet
+-}
 type alias HeroBullet =
     { posBullet : Pos
     , dx : Int
@@ -42,20 +65,30 @@ type Dir
     | None
 
 
+{-| specifies the hero's hitbox width
+-}
 heroWidth : Int
 heroWidth =
     90
 
 
+{-| specifies the hero's hitbox height
+-}
 heroHeight : Int
 heroHeight =
     120
 
 
+{-| specifies the hero's bullets hitbox width
+-}
+bulletWidth : number
 bulletWidth =
     10
 
 
+{-| specifies the hero's bullets hitbox height
+-}
+bulletHeight : number
 bulletHeight =
     20
 
@@ -65,11 +98,15 @@ heroSpeed =
     15
 
 
+{-| initialize the hero
+-}
 init : () -> Hero
 init _ =
     Hero ( 500, 800 ) 3 False False False False None 0 3 0 False
 
 
+{-| animate the hero for a new frame
+-}
 animateHero :
     Float
     -> { a | hero : Hero, heroBullets : List HeroBullet }
@@ -107,6 +144,8 @@ acoiufbev hero nElapsed =
     { hero | spElapsed = nElapsed }
 
 
+{-| draw the hero
+-}
 drawHero : Hero -> Svg msg
 drawHero hero =
     Svg.g []
@@ -183,19 +222,29 @@ moveHero ({ hero } as model) =
                 None ->
                     hero
     in
-    { model | hero = newHero }
+    if inBoundsDimensions newHero.pos ( heroWidth, heroHeight ) then
+        { model | hero = newHero }
+
+    else
+        model
 
 
+{-| let the hero start moving in a direction
+-}
 startMove : Hero -> Hero
 startMove hero =
     { hero | heroDir = direction hero }
 
 
+{-| make the hero shoot a bullet
+-}
 shootBullet : Hero -> HeroBullet
 shootBullet hero =
     HeroBullet (moveBy ( heroWidth // 2, -bulletHeight ) hero.pos) 0 -5
 
 
+{-| animate the hero bullets for a new frame
+-}
 animateHeroBullets :
     { a | heroBullets : List HeroBullet }
     -> { a | heroBullets : List HeroBullet }
@@ -208,6 +257,7 @@ animateHeroBullets ({ heroBullets } as model) =
     { model | heroBullets = newBullets }
 
 
+animateHeroBullet : HeroBullet -> HeroBullet
 animateHeroBullet bullet =
     let
         ( x, y ) =
@@ -247,6 +297,8 @@ direction { moveLeft, moveRight, moveUp, moveDown } =
             None
 
 
+{-| draw the hero's bullets
+-}
 drawHeroBullets : List HeroBullet -> List (Svg Msg)
 drawHeroBullets enemyBullets =
     enemyBullets |> List.map drawHeroBullet

@@ -3,6 +3,8 @@ module Messages exposing (..)
 import Dir exposing (Dir)
 
 
+{-| specifies all types of messages in the program
+-}
 type Msg
     = Tick Float
     | MoveHeroUp Bool
