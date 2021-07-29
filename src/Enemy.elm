@@ -89,7 +89,7 @@ type alias Enemy =
 {-| Contains all data needed to animate an enemy bullet
 -}
 type alias EnemyBullet =
-    { posBullet : Pos, dx : Int, dy : Int }
+    { pos : Pos, dx : Int, dy : Int }
 
 
 bulletSpeed : Float
@@ -161,7 +161,7 @@ drawBullet : EnemyBullet -> Svg Msg
 drawBullet bullet =
     let
         ( x, y ) =
-            bullet.posBullet
+            bullet.pos
     in
     Svg.rect
         [ SvgAttr.x <| String.fromInt x
@@ -267,9 +267,9 @@ animateEnemyBullet : EnemyBullet -> EnemyBullet
 animateEnemyBullet bullet =
     let
         ( x, y ) =
-            bullet.posBullet
+            bullet.pos
     in
-    { bullet | posBullet = ( x + bullet.dx, y + bullet.dy ) }
+    { bullet | pos = ( x + bullet.dx, y + bullet.dy ) }
 
 
 {-| change an enemies direction at an index
