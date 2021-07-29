@@ -23,22 +23,34 @@ import Dir exposing (Dir(..))
 import Field exposing (Pos, inBoundsX, moveBy)
 import Hero exposing (shootBullet)
 import Messages exposing (Msg(..))
-import Svg exposing (Svg, rect)
+import Svg exposing (Svg)
 import Svg.Attributes as SvgAttr
 
 
+{-| The hitbox width of the enemy
+-}
+enemyWidth : number
 enemyWidth =
     80
 
 
+{-| The hitbox height of the enemy
+-}
+enemyHeight : number
 enemyHeight =
     80
 
 
+{-| The hitbox width of the enemy bullet
+-}
+bulletWidth : number
 bulletWidth =
     10
 
 
+{-| The hitbox height of the enemy bullet
+-}
+bulletHeight : number
 bulletHeight =
     20
 
@@ -57,6 +69,8 @@ type alias SubShootAnimation =
     }
 
 
+{-| Contains all data needed to animate an enemy.
+-}
 type alias Enemy =
     { pos : Pos
     , hp : Int
@@ -69,6 +83,8 @@ type alias Enemy =
     }
 
 
+{-| Contains all data needed to animate an enemy bullet
+-}
 type alias EnemyBullet =
     { posBullet : Pos, dx : Int, dy : Int }
 
@@ -78,21 +94,30 @@ bulletSpeed =
     12
 
 
+{-| Create a basic enemy that only shoots straight down
+-}
 newBasicEnemy : Pos -> Dir -> Enemy
 newBasicEnemy pos dir =
     Enemy pos 5 5 dir (newAnimation 1500 0) (newAnimation 1000 0) Basic Nothing
 
 
+{-| Create an enemy that shoots in a few directions at once
+-}
 newSunEnemy : Pos -> Dir -> Enemy
 newSunEnemy pos dir =
     Enemy pos 5 5 dir (newAnimation 1500 0) (newAnimation 1000 0) Sun Nothing
 
 
+{-| Create an "fake" enemy that shoots in circles and doesnt show on the screen.
+Use to add shooting animation without an enemy.
+-}
 newEnvironmentalEnemy : Pos -> Enemy
 newEnvironmentalEnemy pos =
     Enemy pos 1 1 None (newAnimation 0 -1) (newAnimationWithDelay 3000 1000 0) Environmental Nothing
 
 
+{-| Create an enemy that shoots in a Spiral
+-}
 newSpiralEnemy : Pos -> Dir -> Float -> Enemy
 newSpiralEnemy pos dir startElapsed =
     Enemy pos
@@ -108,21 +133,22 @@ newSpiralEnemy pos dir startElapsed =
                 newAnimation 20 20
 
 
+{-| Create a "final boss" that switches between different shooting patterns
+-}
 finalBoss : Pos -> Dir -> Enemy
 finalBoss pos dir =
     Enemy pos 10 10 dir (newAnimation 1500 0) (newAnimation 1000 0) Final Nothing
 
 
-finalBossShootBullet : Int -> Pos -> List EnemyBullet
-finalBossShootBullet triggerCount enemy =
-    shootSpiralBullet triggerCount enemy
-
-
+{-| Draw all the enemies in a list
+-}
 drawEnemies : List Enemy -> List (Svg Msg)
 drawEnemies enemies =
     enemies |> List.map drawEnemy
 
 
+{-| Draw all the enemy bullets in a list
+-}
 drawBullets : List EnemyBullet -> List (Svg Msg)
 drawBullets enemyBullets =
     enemyBullets |> List.map drawBullet
@@ -144,6 +170,8 @@ drawBullet bullet =
         []
 
 
+{-| animate all the enemies in a list (Tick)
+-}
 animateEnemies :
     Float
     -> { a | enemies : List Enemy, enemyBullets : List EnemyBullet }
@@ -154,6 +182,8 @@ animateEnemies elapsed model =
         |> animateEnemyBullets
 
 
+{-| generate random direction commands for all enemies that should change direction
+-}
 changeDirCmds : Float -> { a | enemies : List Enemy } -> ( { a | enemies : List Enemy }, Cmd Msg )
 changeDirCmds elapsed ({ enemies } as model) =
     let
@@ -239,6 +269,8 @@ animateEnemyBullet bullet =
     { bullet | posBullet = ( x + bullet.dx, y + bullet.dy ) }
 
 
+{-| change an enemies direction at an index
+-}
 changeEnemyDir : Int -> Dir -> List Enemy -> List Enemy
 changeEnemyDir index dir enemies =
     enemies
