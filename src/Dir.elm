@@ -3,12 +3,16 @@ module Dir exposing (Dir(..), generateRandomDirs)
 import Random
 
 
+{-| specifies a direction in the horizontal
+-}
 type Dir
     = Left
     | Right
     | None
 
 
+{-| generate random dir commands for objects with a direction that trigger a given message
+-}
 generateRandomDirs : List ( Int, { a | dir : Dir } ) -> (( Int, Dir ) -> msg) -> Cmd msg
 generateRandomDirs list msg =
     list

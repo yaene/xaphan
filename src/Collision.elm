@@ -11,6 +11,8 @@ isHeroHit hero bullets =
     bullets |> List.any (isBulletCollidingHero hero)
 
 
+{-| check for collisions in the model and update accordingly
+-}
 checkCollision :
     { a
         | enemies : List Enemy

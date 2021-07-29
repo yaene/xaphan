@@ -37,6 +37,8 @@ type State
     | GameOver
 
 
+{-| the game's main program
+-}
 main : Program () Model Msg
 main =
     Browser.element
