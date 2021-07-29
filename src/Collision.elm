@@ -54,8 +54,8 @@ isEnemyHit enemy bullets =
 
 
 isBulletCollidingEnemy : Enemy -> HeroBullet -> Bool
-isBulletCollidingEnemy { pos } { posBullet } =
-    isColliding ( pos, ( enemyWidth, enemyHeight ) ) ( posBullet, ( Hero.bulletWidth, Hero.bulletHeight ) )
+isBulletCollidingEnemy { pos, enemyType } { posBullet } =
+    isColliding ( pos, ( enemyWidth enemyType, enemyHeight enemyType ) ) ( posBullet, ( Hero.bulletWidth, Hero.bulletHeight ) )
 
 
 collideBulletsEnemies :
