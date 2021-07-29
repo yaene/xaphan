@@ -26,9 +26,10 @@ drawModal modalType =
         PauseMenu ->
             drawModal_ "Pause Menu"
                 ""
-                [ ( "Resume", Resume )
-                , ( "Skip Level", NextLevel )
+                [ ( "Skip Level", NextLevel )
                 , ( "Restart Level", Retry )
+                , ( "Main Menu", Reset )
+                , ( "Resume", Resume )
                 ]
 
         ClearedMessage ->
@@ -79,7 +80,7 @@ drawModal_ title content actions =
             , style "border-radius" "15px"
             , style "min-height" "200px"
             , style "width" "300px"
-            , style "padding" "10px 20px 10px 20px"
+            , style "padding" "20px"
             ]
             [ div
                 [ style "margin-bottom" "10px"
