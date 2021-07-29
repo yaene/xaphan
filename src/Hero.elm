@@ -15,7 +15,7 @@ module Hero exposing
     )
 
 import Dir exposing (Dir(..))
-import Field exposing (Pos, moveBy)
+import Field exposing (Pos, inBoundsDimensions, moveBy)
 import Messages exposing (Msg(..))
 import Svg exposing (Svg)
 import Svg.Attributes as SvgAttr
@@ -185,7 +185,11 @@ moveHero ({ hero } as model) =
                 None ->
                     hero
     in
-    { model | hero = newHero }
+    if inBoundsDimensions newHero.pos ( heroWidth, heroHeight ) then
+        { model | hero = newHero }
+
+    else
+        model
 
 
 {-| let the hero start moving in a direction

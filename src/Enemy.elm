@@ -50,7 +50,7 @@ type alias Enemy =
 
 
 type alias EnemyBullet =
-    { posBullet : Pos, dx : Int, dy : Int }
+    { pos : Pos, dx : Int, dy : Int }
 
 
 newBasicEnemy : Pos -> Dir -> Enemy
@@ -82,7 +82,7 @@ drawBullet : EnemyBullet -> Svg Msg
 drawBullet bullet =
     let
         ( x, y ) =
-            bullet.posBullet
+            bullet.pos
     in
     Svg.rect
         [ SvgAttr.x <| String.fromInt x
@@ -173,9 +173,9 @@ animateEnemyBullet : EnemyBullet -> EnemyBullet
 animateEnemyBullet bullet =
     let
         ( x, y ) =
-            bullet.posBullet
+            bullet.pos
     in
-    { bullet | posBullet = ( x + bullet.dx, y + bullet.dy ) }
+    { bullet | pos = ( x + bullet.dx, y + bullet.dy ) }
 
 
 changeEnemyDir : Int -> Dir -> List Enemy -> List Enemy
