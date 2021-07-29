@@ -102,7 +102,7 @@ type alias EnemyBullet =
 
 bulletSpeed : Float
 bulletSpeed =
-    12
+    10
 
 
 {-| Create a basic enemy that only shoots straight down
@@ -122,9 +122,9 @@ newSunEnemy pos dir =
 {-| Create an "fake" enemy that shoots in circles and doesnt show on the screen.
 Use to add shooting animation without an enemy.
 -}
-newEnvironmentalEnemy : Pos -> Enemy
-newEnvironmentalEnemy pos =
-    Enemy pos 1 1 None (newAnimation 0 -1) (newAnimationWithDelay 3000 1000 0) Environmental Nothing
+newEnvironmentalEnemy : Pos -> Float -> Enemy
+newEnvironmentalEnemy pos delay =
+    Enemy pos 1 1 None (newAnimation 0 -1) (newAnimationWithDelay delay 1000 0) Environmental Nothing
 
 
 {-| Create an enemy that shoots in a Spiral
