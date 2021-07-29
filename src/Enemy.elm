@@ -55,6 +55,9 @@ bulletHeight =
     20
 
 
+{-| The different types of enemies.
+Use in case differentiating between different types is needed
+-}
 type EnemyType
     = Basic
     | Sun
