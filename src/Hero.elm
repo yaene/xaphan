@@ -85,7 +85,7 @@ bulletHeight =
 
 heroSpeed : number
 heroSpeed =
-    10
+    8
 
 
 {-| initialize the hero
