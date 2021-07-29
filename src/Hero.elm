@@ -1,23 +1,4 @@
-module Hero exposing
-    ( Hero
-    , HeroBullet
-    , animateHero
-    , animateHeroBullets
-    , atkDouble
-    , bulletHeight
-    , bulletWidth
-    , drawHero
-    , drawHeroBullets
-    , heroHeight
-    , heroWidth
-    , init
-    , moveHero
-    , selectSuperPower
-    , setSuperpower
-    , shootBullet
-    , startMove
-    , useSuperpower
-    )
+module Hero exposing (Hero, HeroBullet, animateHero, animateHeroBullets, atkDouble, bulletHeight, bulletWidth, drawHero, drawHeroBullets, heroHeight, heroWidth, init, moveHero, selectSuperPower, setSuperpower, shootBullet, startMove, useSuperpower)
 
 import Dir exposing (Dir(..))
 import Field exposing (Pos, inBoundsDimensions, moveBy)
@@ -130,18 +111,18 @@ deactivateAtkDouble elapsed model =
     if atkDoubled == False then
         model
 
-    else if nElapsed > 5000 then
+    else if nElapsed >= 5000 then
         { model
-            | hero = acoiufbev (deAtkDouble model.hero) 0
+            | hero = updateElapsed (deAtkDouble model.hero) -5000
         }
 
     else
-        { model | hero = acoiufbev model.hero nElapsed }
+        { model | hero = updateElapsed model.hero nElapsed }
 
 
-acoiufbev : Hero -> Int -> Hero
-acoiufbev hero nElapsed =
-    { hero | spElapsed = nElapsed }
+updateElapsed : Hero -> Int -> Hero
+updateElapsed hero nElapsed =
+    { hero | spElapsed = hero.spElapsed + nElapsed }
 
 
 {-| draw the hero

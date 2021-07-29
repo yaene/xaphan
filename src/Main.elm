@@ -166,7 +166,7 @@ key on keycode =
         87 ->
             MoveHeroUp on
 
-        --key: x
+        -- key: x
         88 ->
             HeroUseSuperpower
 
