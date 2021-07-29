@@ -265,13 +265,18 @@ update msg model =
                 ( newModel, _ ) =
                     init ()
             in
-            ( { newModel | enemies = loadLevel <| model.level, level = model.level, state = Playing }, Cmd.none )
+            ( { newModel | enemies = loadLevel <| model.level, level = model.level, state = Playing, hero = loadSpSelection model.hero model.hero.spSelection }, Cmd.none )
 
         ShowControls ->
             ( { model | state = Controls }, Cmd.none )
 
         Noop ->
             ( model, Cmd.none )
+
+
+loadSpSelection : Hero -> Int -> Hero
+loadSpSelection hero oldSpSelection =
+    { hero | spSelection = oldSpSelection }
 
 
 animate : Float -> Model -> ( Model, Cmd Msg )
