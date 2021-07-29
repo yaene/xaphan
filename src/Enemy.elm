@@ -73,6 +73,11 @@ type alias EnemyBullet =
     { posBullet : Pos, dx : Int, dy : Int }
 
 
+bulletSpeed : Float
+bulletSpeed =
+    12
+
+
 newBasicEnemy : Pos -> Dir -> Enemy
 newBasicEnemy pos dir =
     Enemy pos 5 5 dir (newAnimation 1500 0) (newAnimation 1000 0) Basic Nothing
@@ -196,8 +201,8 @@ shootSunBullets offset shooterPos =
         |> List.map
             (\i ->
                 EnemyBullet (moveBy ( round <| enemyWidth / 2, round <| enemyHeight / 2 ) shooterPos)
-                    (round <| (15 * cos ((i |> toFloat) * pi / 4 + (offset |> toFloat) * pi / 10)))
-                    (round <| (15 * sin ((i |> toFloat) * pi / 4 + (offset |> toFloat) * pi / 10)))
+                    (round <| (bulletSpeed * cos ((i |> toFloat) * pi / 4 + (offset |> toFloat) * pi / 10)))
+                    (round <| (bulletSpeed * sin ((i |> toFloat) * pi / 4 + (offset |> toFloat) * pi / 10)))
             )
 
 
@@ -207,21 +212,21 @@ shootCircleBullets _ shooterPos =
         |> List.map
             (\i ->
                 EnemyBullet (moveBy ( round <| enemyWidth / 2, round <| enemyHeight / 2 ) shooterPos)
-                    (round <| (15 * cos ((i |> toFloat) * pi / 8)))
-                    (round <| (15 * sin ((i |> toFloat) * pi / 8)))
+                    (round <| (bulletSpeed * cos ((i |> toFloat) * pi / 8)))
+                    (round <| (bulletSpeed * sin ((i |> toFloat) * pi / 8)))
             )
 
 
 shootBullet : Int -> Pos -> List EnemyBullet
 shootBullet _ shooterPos =
-    [ EnemyBullet (moveBy ( round <| enemyWidth / 2, enemyHeight ) shooterPos) 0 5 ]
+    [ EnemyBullet (moveBy ( round <| enemyWidth / 2, enemyHeight ) shooterPos) 0 <| round bulletSpeed ]
 
 
 shootSpiralBullet : Int -> Pos -> List EnemyBullet
 shootSpiralBullet count shooterPos =
     [ EnemyBullet (moveBy ( round <| enemyWidth / 2, round <| enemyHeight / 2 ) shooterPos)
-        (round <| (15 * cos ((count |> toFloat) * pi / 10)))
-        (round <| (15 * sin ((count |> toFloat) * pi / 10)))
+        (round <| (bulletSpeed * cos ((count |> toFloat) * pi / 10)))
+        (round <| (bulletSpeed * sin ((count |> toFloat) * pi / 10)))
     ]
 
 
