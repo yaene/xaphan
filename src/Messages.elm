@@ -12,7 +12,7 @@ type Msg
     | MoveHeroLeft Bool
     | MoveHeroRight Bool
     | HeroShootBullet
-    | HeroUseSuperpower
+    | HeroUseSuperpower Bool
     | ChangeEnemyDir ( Int, Dir )
     | NextLevel
     | ShowControls

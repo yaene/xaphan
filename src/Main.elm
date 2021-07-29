@@ -168,7 +168,7 @@ key on keycode =
 
         -- key: x
         88 ->
-            HeroUseSuperpower
+            HeroUseSuperpower on
 
         -- key: z
         90 ->
@@ -229,7 +229,7 @@ update msg model =
             , Cmd.none
             )
 
-        HeroUseSuperpower ->
+        HeroUseSuperpower on ->
             ( model |> useSuperPower, Cmd.none )
 
         Tick elapsed ->
