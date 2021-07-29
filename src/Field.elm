@@ -1,4 +1,4 @@
-module Field exposing (Pos, filterOutOfBounds, inBoundsX, moveBy)
+module Field exposing (Pos, filterOutOfBounds, inBoundsDimensions, inBoundsX, moveBy)
 
 
 type alias Pos =
@@ -20,8 +20,14 @@ inBoundsX ( x, _ ) width =
     x >= 0 && x + width <= fieldWidth
 
 
+inBoundsDimensions : Pos -> Pos -> Bool
+inBoundsDimensions (( x, y ) as pos) dimensions =
+    inBounds pos && inBounds (Tuple.mapBoth ((+) x) ((+) y) dimensions)
+
+
 inBounds : Pos -> Bool
 inBounds ( x, y ) =
+    {- only  checks for position not worrying about objects dimensions -}
     (x >= 0 && x <= fieldWidth)
         && (y >= 0 && y <= fieldHeight)
 

@@ -1,7 +1,7 @@
 module Hero exposing (Hero, HeroBullet, animateHero, animateHeroBullets, bulletHeight, bulletWidth, drawHero, drawHeroBullets, heroHeight, heroWidth, init, moveHero, shootBullet, startMove)
 
 import Dir exposing (Dir(..))
-import Field exposing (Pos, moveBy)
+import Field exposing (Pos, inBoundsDimensions, moveBy)
 import Messages exposing (Msg(..))
 import Svg exposing (Svg)
 import Svg.Attributes as SvgAttr
@@ -151,7 +151,11 @@ moveHero ({ hero } as model) =
                 None ->
                     hero
     in
-    { model | hero = newHero }
+    if inBoundsDimensions newHero.pos ( heroWidth, heroHeight ) then
+        { model | hero = newHero }
+
+    else
+        model
 
 
 startMove : Hero -> Hero
