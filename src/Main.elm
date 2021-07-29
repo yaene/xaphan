@@ -91,12 +91,13 @@ view model =
     Html.div
         [ HtmlAttr.style "display" "flex"
         , HtmlAttr.style "justify-content" "center"
+        , HtmlAttr.style "background-color" "black"
         ]
         [ Html.div
             [ HtmlAttr.style "display" "flex"
             , HtmlAttr.style "width" "100vh"
             , HtmlAttr.style "height" "100vh"
-            , HtmlAttr.style "background-color" "gray"
+            , HtmlAttr.style "background-image" "url(/assets/Background_1.png.png)"
             , HtmlAttr.style "justify-content" "center"
             ]
             content
