@@ -32,7 +32,11 @@ checkCollision model =
 
 
 isBulletCollidingHero : Hero -> EnemyBullet -> Bool
-isBulletCollidingHero { pos } { posBullet } =
+isBulletCollidingHero { pos } bullet =
+    let
+        posBullet =
+            bullet.pos
+    in
     isColliding ( pos, ( heroWidth, heroHeight ) ) ( posBullet, ( Enemy.bulletWidth, Enemy.bulletHeight ) )
 
 
@@ -88,7 +92,6 @@ collideBulletsHero ({ hero, enemyBullets } as model) =
 
     else
         model
-
 
 
 reduceEnemyHealth : Enemy -> List HeroBullet -> Enemy
