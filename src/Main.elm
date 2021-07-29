@@ -4,7 +4,7 @@ import Browser
 import Browser.Events exposing (onAnimationFrameDelta, onKeyDown, onKeyUp)
 import Collision exposing (checkCollision)
 import Dir exposing (Dir(..))
-import Enemy exposing (Enemy, EnemyBullet, animateEnemies, changeDirCmds, changeEnemyDir, drawBullets, drawEnemies)
+import Enemy exposing (Enemy, EnemyBullet, EnemyType(..), animateEnemies, changeDirCmds, changeEnemyDir, drawBullets, drawEnemies)
 import Field exposing (filterOutOfBounds)
 import Hero exposing (..)
 import Html exposing (Html, button, div, text)
@@ -309,7 +309,7 @@ newState model =
     if model.hero.hp <= 0 then
         { model | state = GameOver }
 
-    else if List.isEmpty model.enemies then
+    else if isLevelCleared model.enemies then
         case model.state of
             Playing ->
                 { model | state = Cleared }
@@ -349,3 +349,10 @@ spClearBullets enemyBullets hero =
 
     else
         enemyBullets
+
+
+isLevelCleared : List Enemy -> Bool
+isLevelCleared enemies =
+    enemies
+        |> (List.filter <| .enemyType >> (/=) Environmental)
+        |> List.isEmpty

@@ -1,6 +1,6 @@
 module Collision exposing (checkCollision)
 
-import Enemy exposing (Enemy, EnemyBullet, enemyHeight, enemyWidth)
+import Enemy exposing (Enemy, EnemyBullet, EnemyType(..), enemyHeight, enemyWidth)
 import Field exposing (Pos)
 import Hero exposing (Hero, HeroBullet, heroHeight, heroWidth)
 import List
@@ -54,8 +54,8 @@ isEnemyHit enemy bullets =
 
 
 isBulletCollidingEnemy : Enemy -> HeroBullet -> Bool
-isBulletCollidingEnemy { pos } { posBullet } =
-    isColliding ( pos, ( enemyWidth, enemyHeight ) ) ( posBullet, ( Hero.bulletWidth, Hero.bulletHeight ) )
+isBulletCollidingEnemy { pos, enemyType } { posBullet } =
+    isColliding ( pos, ( enemyWidth enemyType, enemyHeight enemyType ) ) ( posBullet, ( Hero.bulletWidth, Hero.bulletHeight ) )
 
 
 collideBulletsEnemies :
