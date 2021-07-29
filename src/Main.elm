@@ -234,7 +234,11 @@ update msg model =
             ( { newModel | enemies = loadLevel <| model.level + 1, state = Playing, level = model.level + 1 }, Cmd.none )
 
         Pause ->
-            ( { model | state = Paused }, Cmd.none )
+            if model.state == Playing then
+                ( { model | state = Paused }, Cmd.none )
+
+            else
+                ( model, Cmd.none )
 
         Resume ->
             ( { model | state = Playing }, Cmd.none )
