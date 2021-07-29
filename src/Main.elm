@@ -7,13 +7,14 @@ import Dir exposing (Dir(..))
 import Enemy exposing (Enemy, EnemyBullet, EnemyType(..), animateEnemies, changeDirCmds, changeEnemyDir, drawBullets, drawEnemies)
 import Field exposing (filterOutOfBounds)
 import Hero exposing (..)
-import Html exposing (Html, button, div, text)
+import Html exposing (Html, div)
 import Html.Attributes as HtmlAttr
-import Html.Events exposing (keyCode, onClick)
+import Html.Events exposing (keyCode)
 import Json.Decode
 import Levels exposing (Level, loadLevel)
 import Messages exposing (Msg(..))
 import Modals exposing (ModalType(..), drawModal)
+import StyledComponents
 import Svg
 import Svg.Attributes as SvgAttr
 
@@ -114,8 +115,8 @@ drawInitialPage =
         , HtmlAttr.style "height" "80px"
         , HtmlAttr.style "justify-content" "space-evenly"
         ]
-        [ button [ onClick NextLevel ] [ text "New Game" ]
-        , button [ onClick ShowControls ] [ text "Controls" ]
+        [ StyledComponents.button "New Game" NextLevel [ HtmlAttr.style "margin-bottom" "20px" ]
+        , StyledComponents.button "Controls" ShowControls []
         ]
 
 
