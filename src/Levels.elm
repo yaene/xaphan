@@ -36,8 +36,8 @@ loadLevel level =
 
         4 ->
             [ finalBoss ( 50, 200 ) Right
-            , newEnvironmentalEnemy ( 300, -100 )
-            , newEnvironmentalEnemy ( 700, -100 )
+            , newEnvironmentalEnemy ( 100, 0 )
+            , newEnvironmentalEnemy ( 900, 0 )
             ]
 
         _ ->

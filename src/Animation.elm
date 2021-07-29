@@ -1,4 +1,4 @@
-module Animation exposing (Animation, newAnimation, updateAnimation)
+module Animation exposing (Animation, newAnimation, newAnimationWithDelay, updateAnimation)
 
 
 type alias Animation =
@@ -14,6 +14,11 @@ type alias Animation =
 newAnimation : Float -> Int -> Animation
 newAnimation interval steps =
     Animation 0 interval False True 0 steps
+
+
+newAnimationWithDelay : Float -> Float -> Int -> Animation
+newAnimationWithDelay delay interval steps =
+    Animation -delay interval False True 0 steps
 
 
 updateAnimation : Animation -> Float -> Animation

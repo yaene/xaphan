@@ -18,7 +18,7 @@ module Enemy exposing
     , newSunEnemy
     )
 
-import Animation exposing (Animation, newAnimation, updateAnimation)
+import Animation exposing (Animation, newAnimation, newAnimationWithDelay, updateAnimation)
 import Dir exposing (Dir(..))
 import Field exposing (Pos, inBoundsX, moveBy)
 import Hero exposing (shootBullet)
@@ -85,7 +85,7 @@ newSunEnemy pos dir =
 
 newEnvironmentalEnemy : Pos -> Enemy
 newEnvironmentalEnemy pos =
-    Enemy pos 1 1 None (newAnimation 0 -1) (newAnimation 800 0) Environmental Nothing
+    Enemy pos 1 1 None (newAnimation 0 -1) (newAnimationWithDelay 3000 1000 0) Environmental Nothing
 
 
 newSpiralEnemy : Pos -> Dir -> Float -> Enemy
@@ -411,11 +411,19 @@ drawEnemy enemy =
     let
         ( x, y ) =
             enemy.pos
+
+        display =
+            if enemy.enemyType == Environmental then
+                "none"
+
+            else
+                "inline"
     in
     Svg.svg
         [ SvgAttr.x <| String.fromInt x
         , SvgAttr.y <| String.fromInt y
         , SvgAttr.height <| String.fromInt <| enemyHeight + 5
+        , SvgAttr.display display
         ]
         [ Svg.use
             [ SvgAttr.xlinkHref "assets/monster.svg#monster"
