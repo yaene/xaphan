@@ -1,4 +1,23 @@
-module Hero exposing (Hero, HeroBullet, animateHero, animateHeroBullets, atkDouble, bulletHeight, bulletWidth, drawHero, drawHeroBullets, heroHeight, heroWidth, init, moveHero, selectSuperPower, setSuperpower, shootBullet, startMove, useSuperpower)
+module Hero exposing
+    ( Hero
+    , HeroBullet
+    , animateHero
+    , animateHeroBullets
+    , atkDouble
+    , bulletHeight
+    , bulletWidth
+    , drawHero
+    , drawHeroBullets
+    , heroHeight
+    , heroWidth
+    , init
+    , moveHero
+    , selectSuperPower
+    , setSuperpower
+    , shootBullet
+    , startMove
+    , useSuperpower
+    )
 
 import Dir exposing (Dir(..))
 import Field exposing (Pos, inBoundsDimensions, moveBy)

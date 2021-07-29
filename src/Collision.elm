@@ -103,7 +103,7 @@ reduceEnemyHealth enemy hero heroBullets =
             { enemy | hp = enemy.hp - 2 }
 
         else
-            { enemy | hp = enemy.hp - 2 }
+            { enemy | hp = enemy.hp - 1 }
 
     else
         enemy

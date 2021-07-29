@@ -329,9 +329,6 @@ useSuperPower model =
         2 ->
             { model | hero = model.hero |> atkDouble |> Hero.useSuperpower }
 
-        3 ->
-            model
-
         _ ->
             model
 
