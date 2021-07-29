@@ -1,6 +1,6 @@
 module Collision exposing (checkCollision)
 
-import Enemy exposing (Enemy, EnemyBullet, enemyHeight, enemyWidth)
+import Enemy exposing (Enemy, EnemyBullet, EnemyType(..), enemyHeight, enemyWidth)
 import Field exposing (Pos)
 import Hero exposing (Hero, HeroBullet, heroHeight, heroWidth)
 import List
@@ -90,10 +90,9 @@ collideBulletsHero ({ hero, enemyBullets } as model) =
         model
 
 
-
 reduceEnemyHealth : Enemy -> List HeroBullet -> Enemy
 reduceEnemyHealth enemy heroBullets =
-    if isEnemyHit enemy heroBullets then
+    if isEnemyHit enemy heroBullets && enemy.enemyType /= Environmental then
         { enemy | hp = enemy.hp - 1 }
 
     else
