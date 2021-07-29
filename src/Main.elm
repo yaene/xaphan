@@ -4,7 +4,8 @@ import Browser
 import Browser.Events exposing (onAnimationFrameDelta, onKeyDown, onKeyUp)
 import Collision exposing (checkCollision)
 import Dir exposing (Dir(..))
-import Enemy exposing (Enemy, EnemyBullet, animateEnemies, changeDirCmds, changeEnemyDir, drawBullets, drawEnemies)
+import Enemy exposing (Enemy, EnemyBullet, EnemyType(..), animateEnemies, changeDirCmds, changeEnemyDir, drawBullets, drawEnemies)
+import Field exposing (filterOutOfBounds)
 import Hero exposing (..)
 import Html exposing (Html, button, div, text)
 import Html.Attributes as HtmlAttr
@@ -36,6 +37,8 @@ type State
     | GameOver
 
 
+{-| the game's main program
+-}
 main : Program () Model Msg
 main =
     Browser.element
@@ -68,7 +71,7 @@ view model =
                         (drawHero model.hero
                             :: (drawEnemies model.enemies
                                     ++ drawBullets model.enemyBullets
-                                    ++ drawBullets model.heroBullets
+                                    ++ drawHeroBullets model.heroBullets
                                )
                         )
                     ]
@@ -259,6 +262,7 @@ animate elapsed model =
                 |> animateEnemies elapsed
                 |> animateHero elapsed
                 |> checkCollision
+                |> filterBulletsOutOfBounds
                 |> newState
                 |> changeDirCmds elapsed
 
@@ -266,12 +270,21 @@ animate elapsed model =
             ( model, Cmd.none )
 
 
+filterBulletsOutOfBounds : Model -> Model
+filterBulletsOutOfBounds model =
+    let
+        filteredBullets =
+            model |> (.enemyBullets >> filterOutOfBounds)
+    in
+    { model | enemyBullets = filteredBullets }
+
+
 newState : Model -> Model
 newState model =
     if model.hero.hp <= 0 then
         { model | state = GameOver }
 
-    else if List.isEmpty model.enemies then
+    else if isLevelCleared model.enemies then
         case model.state of
             Playing ->
                 { model | state = Cleared }
@@ -281,3 +294,10 @@ newState model =
 
     else
         model
+
+
+isLevelCleared : List Enemy -> Bool
+isLevelCleared enemies =
+    enemies
+        |> (List.filter <| .enemyType >> (/=) Environmental)
+        |> List.isEmpty

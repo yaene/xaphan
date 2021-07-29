@@ -6,6 +6,9 @@ import Html.Events exposing (onClick)
 import Messages exposing (Msg(..))
 
 
+{-| specifies the type of modal.
+used to decide how to render a given modal.
+-}
 type ModalType
     = PauseMenu
     | ClearedMessage
@@ -14,6 +17,8 @@ type ModalType
     | ControlsInfo
 
 
+{-| render a modal of a given type
+-}
 drawModal : ModalType -> Html Msg
 drawModal modalType =
     case modalType of
