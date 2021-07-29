@@ -52,9 +52,8 @@ loadLevel level =
 -}
 drawClearedLevel : Level -> List (Html Msg)
 drawClearedLevel level =
-    case level of
-        4 ->
-            [ drawModal WonMessage ]
+    if level >= 4 then
+        [ drawModal WonMessage ]
 
-        _ ->
-            [ drawModal ClearedMessage ]
+    else
+        [ drawModal ClearedMessage ]

@@ -36,7 +36,7 @@ drawModal modalType =
             drawModal_ "Level Cleared" "Congrats you cleared the level!" [ ( "Next Level", NextLevel ) ]
 
         WonMessage ->
-            drawModal_ "You Won :-)" "Congrats you have cleared the whole game!" []
+            drawModal_ "You Won :-)" "Congrats you have cleared the whole game!" [ ( "Main Menu", Reset ) ]
 
         LostMessage ->
             drawModal_ "Game Over :-(" "Better luck next time!" [ ( "Try again", Retry ) ]
