@@ -59,13 +59,13 @@ isBulletCollidingEnemy { pos } { posBullet } =
 
 
 collideBulletsEnemies :
-    { a | enemies : List Enemy, heroBullets : List HeroBullet }
-    -> { a | enemies : List Enemy, heroBullets : List HeroBullet }
-collideBulletsEnemies ({ enemies, heroBullets } as model) =
+    { a | enemies : List Enemy, heroBullets : List HeroBullet, hero : Hero }
+    -> { a | enemies : List Enemy, heroBullets : List HeroBullet, hero : Hero }
+collideBulletsEnemies ({ enemies, heroBullets, hero } as model) =
     let
         aliveEnemies =
             enemies
-                |> List.map (\enemy -> reduceEnemyHealth enemy heroBullets)
+                |> List.map (\enemy -> reduceEnemyHealth enemy hero heroBullets)
                 |> List.filter (.hp >> (<) 0)
 
         uncollidedBullets =
@@ -96,10 +96,14 @@ collideBulletsHero ({ hero, enemyBullets } as model) =
         model
 
 
-reduceEnemyHealth : Enemy -> List HeroBullet -> Enemy
-reduceEnemyHealth enemy heroBullets =
+reduceEnemyHealth : Enemy -> Hero -> List HeroBullet -> Enemy
+reduceEnemyHealth enemy hero heroBullets =
     if isEnemyHit enemy heroBullets then
-        { enemy | hp = enemy.hp - 1 }
+        if hero.atkDoubled then
+            { enemy | hp = enemy.hp - 2 }
+
+        else
+            { enemy | hp = enemy.hp - 2 }
 
     else
         enemy

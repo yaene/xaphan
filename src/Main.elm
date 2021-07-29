@@ -225,15 +225,9 @@ update msg model =
             )
 
         HeroShootBullet ->
-            if atkDoubled then
-                ( { model | heroBullets = shootBullet hero :: shootBullet hero :: model.heroBullets }
-                , Cmd.none
-                )
-
-            else
-                ( { model | heroBullets = shootBullet hero :: model.heroBullets }
-                , Cmd.none
-                )
+            ( { model | heroBullets = shootBullet hero :: model.heroBullets }
+            , Cmd.none
+            )
 
         HeroUseSuperpower ->
             ( model |> useSuperPower, Cmd.none )
