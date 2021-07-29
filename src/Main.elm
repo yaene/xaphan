@@ -243,7 +243,7 @@ update msg model =
                 ( newModel, _ ) =
                     init ()
             in
-            ( { newModel | enemies = loadLevel <| model.level + 1, state = Playing, level = model.level + 1 }, Cmd.none )
+            ( { newModel | enemies = loadLevel <| model.level + 1, state = Playing, level = model.level + 1, hero = loadSpSelection model.hero model.hero.spSelection }, Cmd.none )
 
         Pause ->
             ( { model | state = Paused }, Cmd.none )
