@@ -1,5 +1,8 @@
 module Animation exposing (Animation, newAnimation, newAnimationWithSub, updateAnimation)
 
+{-| contains all information for stepping through an animation
+-}
+
 
 type alias Animation =
     { elapsed : Float
@@ -21,6 +24,8 @@ type alias SubAnimation =
     }
 
 
+{-| create a new animation with most common default values
+-}
 newAnimation : Float -> Animation
 newAnimation interval =
     Animation 0 interval False True 0 Nothing
@@ -31,6 +36,8 @@ newAnimationWithSub mainInterval subInterval steps =
     Animation 0 mainInterval False True 0 (Just <| SubAnimation 0 subInterval False False 0 steps)
 
 
+{-| step the animation through a frame
+-}
 updateAnimation : Animation -> Float -> Animation
 updateAnimation animation elapsed =
     let
