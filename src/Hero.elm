@@ -59,14 +59,14 @@ type Dir
 -}
 heroWidth : Int
 heroWidth =
-    90
+    45
 
 
 {-| specifies the hero's hitbox height
 -}
 heroHeight : Int
 heroHeight =
-    120
+    60
 
 
 {-| specifies the hero's bullets hitbox width
@@ -85,7 +85,7 @@ bulletHeight =
 
 heroSpeed : number
 heroSpeed =
-    15
+    8
 
 
 {-| initialize the hero
@@ -263,8 +263,8 @@ direction { moveLeft, moveRight, moveUp, moveDown } =
 {-| draw the hero's bullets
 -}
 drawHeroBullets : List HeroBullet -> List (Svg Msg)
-drawHeroBullets enemyBullets =
-    enemyBullets |> List.map drawHeroBullet
+drawHeroBullets heroBullets =
+    heroBullets |> List.map drawHeroBullet
 
 
 drawHeroBullet : HeroBullet -> Svg Msg
@@ -276,7 +276,7 @@ drawHeroBullet bullet =
     Svg.rect
         [ SvgAttr.x <| String.fromInt x
         , SvgAttr.y <| String.fromInt y
-        , SvgAttr.fill "green"
+        , SvgAttr.fill "blue"
         , SvgAttr.width <| String.fromInt bulletWidth
         , SvgAttr.height <| String.fromInt bulletHeight
         ]
