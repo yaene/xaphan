@@ -7,13 +7,14 @@ import Dir exposing (Dir(..))
 import Enemy exposing (Enemy, EnemyBullet, EnemyType(..), animateEnemies, changeDirCmds, changeEnemyDir, drawBullets, drawEnemies)
 import Field exposing (filterOutOfBounds)
 import Hero exposing (..)
-import Html exposing (Html, button, div, text)
+import Html exposing (Html, div)
 import Html.Attributes as HtmlAttr
-import Html.Events exposing (keyCode, onClick)
+import Html.Events exposing (keyCode)
 import Json.Decode
 import Levels exposing (Level, loadLevel)
 import Messages exposing (Msg(..))
 import Modals exposing (ModalType(..), drawModal)
+import StyledComponents
 import Svg
 import Svg.Attributes as SvgAttr
 
@@ -57,6 +58,13 @@ init _ =
 view : Model -> Html.Html Msg
 view model =
     let
+        backgroundUrl =
+            if model.state == Initial then
+                "url(/assets/Initial_Page.jpg)"
+
+            else
+                "url(/assets/background.jpg)"
+
         content =
             case model.state of
                 Initial ->
@@ -91,12 +99,16 @@ view model =
     Html.div
         [ HtmlAttr.style "display" "flex"
         , HtmlAttr.style "justify-content" "center"
+        , HtmlAttr.style "background-color" "black"
         ]
         [ Html.div
             [ HtmlAttr.style "display" "flex"
             , HtmlAttr.style "width" "100vh"
             , HtmlAttr.style "height" "100vh"
-            , HtmlAttr.style "background-color" "gray"
+            , HtmlAttr.style "background-image" backgroundUrl
+            , HtmlAttr.style "background-size" "contain"
+            , HtmlAttr.style "background-repeat" "no-repeat"
+            , HtmlAttr.style "background-position" "center"
             , HtmlAttr.style "justify-content" "center"
             ]
             content
@@ -113,8 +125,8 @@ drawInitialPage =
         , HtmlAttr.style "height" "80px"
         , HtmlAttr.style "justify-content" "space-evenly"
         ]
-        [ button [ onClick NextLevel ] [ text "New Game" ]
-        , button [ onClick ShowControls ] [ text "Controls" ]
+        [ StyledComponents.button "New Game" NextLevel [ HtmlAttr.style "margin-bottom" "20px" ]
+        , StyledComponents.button "Controls" ShowControls []
         ]
 
 
@@ -232,7 +244,11 @@ update msg model =
             ( { newModel | enemies = loadLevel <| model.level + 1, state = Playing, level = model.level + 1 }, Cmd.none )
 
         Pause ->
-            ( { model | state = Paused }, Cmd.none )
+            if model.state == Playing then
+                ( { model | state = Paused }, Cmd.none )
+
+            else
+                ( model, Cmd.none )
 
         Resume ->
             ( { model | state = Playing }, Cmd.none )
