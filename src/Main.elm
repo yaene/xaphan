@@ -129,7 +129,7 @@ drawInitialPage =
         , HtmlAttr.style "height" "80px"
         , HtmlAttr.style "justify-content" "space-evenly"
         ]
-        [ StyledComponents.button "New Game" NextLevel [ HtmlAttr.style "margin-bottom" "20px" ]
+        [ StyledComponents.button "New Game" Selecting [ HtmlAttr.style "margin-bottom" "20px" ]
         , StyledComponents.button "Controls" ShowControls []
         ]
 
