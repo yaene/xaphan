@@ -374,7 +374,13 @@ drawHeroBullet bullet =
         [ SvgAttr.x <| String.fromInt x
         , SvgAttr.y <| String.fromInt y
         ]
-        []
+        [ Svg.use
+            [ SvgAttr.width <| String.fromInt bulletWidth
+            , SvgAttr.height <| String.fromInt bulletHeight
+            , SvgAttr.xlinkHref "assets/hero_bullet.svg#hero_bullet"
+            ]
+            []
+        ]
 
 
 {-| return player superpower selection to the function that calls it
