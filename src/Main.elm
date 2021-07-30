@@ -60,10 +60,10 @@ view model =
     let
         backgroundUrl =
             if model.state == Initial then
-                "url(/assets/Initial_Page.jpg)"
+                "url(assets/Initial_Page.jpg)"
 
             else
-                "url(/assets/background.jpg)"
+                "url(assets/background.jpg)"
 
         content =
             case model.state of
