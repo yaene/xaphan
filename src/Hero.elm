@@ -1,12 +1,30 @@
-module Hero exposing (Hero, HeroBullet, animateHero, animateHeroBullets, bulletHeight, bulletWidth, drawHero, drawHeroBullets, heroHeight, heroWidth, init, moveHero, shootBullet, startMove)
+module Hero exposing
+    ( Hero
+    , HeroBullet
+    , animateHero
+    , animateHeroBullets
+    , bulletHeight
+    , bulletWidth
+    , drawHero
+    , drawHeroBullets
+    , heroHeight
+    , heroWidth
+    , init
+    , startMove
+    , startShooting
+    , stopShooting
+    )
 
+import Animation exposing (Animation, newAnimation, updateAnimation)
 import Dir exposing (Dir(..))
-import Field exposing (Pos, moveBy)
+import Field exposing (Pos, inBoundsDimensions)
 import Messages exposing (Msg(..))
 import Svg exposing (Svg)
 import Svg.Attributes as SvgAttr
 
 
+{-| contains all the data for animating the hero
+-}
 type alias Hero =
     { pos : Pos
     , hp : Int
@@ -15,11 +33,14 @@ type alias Hero =
     , moveUp : Bool
     , moveDown : Bool
     , heroDir : Dir
+    , shootingAnimation : Animation
     }
 
 
+{-| contains all the data for animating a hero bullet
+-}
 type alias HeroBullet =
-    { posBullet : Pos
+    { pos : Pos
     , dx : Int
     , dy : Int
     }
@@ -37,53 +58,91 @@ type Dir
     | None
 
 
+{-| specifies the hero's hitbox width
+-}
 heroWidth : Int
 heroWidth =
-    90
+    45
 
 
+{-| specifies the hero's hitbox height
+-}
 heroHeight : Int
 heroHeight =
-    120
+    60
 
 
+{-| specifies the hero's bullets hitbox width
+-}
+bulletWidth : number
 bulletWidth =
     10
 
 
+{-| specifies the hero's bullets hitbox height
+-}
+bulletHeight : number
 bulletHeight =
     20
 
 
 heroSpeed : number
 heroSpeed =
-    15
+    8
 
 
+{-| initialize the hero
+-}
 init : () -> Hero
 init _ =
-    Hero ( 500, 800 ) 3 False False False False None
+    Hero ( 500, 800 ) 3 False False False False None <|
+        Animation 0 200 False False 0 0
 
 
+{-| animate the hero for a new frame
+-}
 animateHero :
     Float
     -> { a | hero : Hero, heroBullets : List HeroBullet }
     -> { a | hero : Hero, heroBullets : List HeroBullet }
-animateHero _ model =
+animateHero elapsed model =
     model
         |> moveHero
+        |> animateShooting elapsed
         |> animateHeroBullets
 
 
+animateShooting :
+    Float
+    -> { a | hero : Hero, heroBullets : List HeroBullet }
+    -> { a | hero : Hero, heroBullets : List HeroBullet }
+animateShooting elapsed ({ hero, heroBullets } as model) =
+    let
+        updatedAnimation =
+            updateAnimation hero.shootingAnimation elapsed
+
+        newHero =
+            { hero | shootingAnimation = updatedAnimation }
+    in
+    if updatedAnimation.shouldTrigger then
+        { model | hero = newHero, heroBullets = shootBullet hero :: heroBullets }
+
+    else
+        { model | hero = newHero }
+
+
+{-| draw the hero
+-}
 drawHero : Hero -> Svg msg
 drawHero hero =
-    Svg.g []
-        [ Svg.rect
-            [ SvgAttr.x <| String.fromInt <| Tuple.first hero.pos
-            , SvgAttr.y <| String.fromInt <| Tuple.second hero.pos
-            , SvgAttr.height <| String.fromInt heroHeight
-            , SvgAttr.width <| String.fromInt heroWidth
-            , SvgAttr.fill "blue"
+    Svg.svg
+        []
+        [ Svg.use
+            [ SvgAttr.height <| String.fromInt 110
+            , SvgAttr.width <| String.fromInt 55
+            , SvgAttr.xlinkHref "assets/hero.svg#hero"
+            , SvgAttr.x <| String.fromInt <| Tuple.first hero.pos - 5
+            , SvgAttr.y <| String.fromInt <| Tuple.second hero.pos - 10
             ]
             []
         , drawLives hero.hp
@@ -151,19 +210,64 @@ moveHero ({ hero } as model) =
                 None ->
                     hero
     in
-    { model | hero = newHero }
+    if inBoundsDimensions newHero.pos ( heroWidth, heroHeight ) then
+        { model | hero = newHero }
+
+    else
+        model
 
 
+{-| let the hero start moving in a direction
+-}
 startMove : Hero -> Hero
 startMove hero =
     { hero | heroDir = direction hero }
 
 
+startShooting :
+    { a | hero : Hero, heroBullets : List HeroBullet }
+    -> { a | hero : Hero, heroBullets : List HeroBullet }
+startShooting ({ hero, heroBullets } as model) =
+    if not hero.shootingAnimation.isActive then
+        let
+            animation =
+                hero.shootingAnimation
+
+            newAnimation =
+                { animation | isActive = True, elapsed = 0 }
+
+            newHero =
+                { hero | shootingAnimation = newAnimation }
+        in
+        { model | hero = newHero, heroBullets = shootBullet hero :: heroBullets }
+
+    else
+        model
+
+
+{-| stop the shooting animation
+-}
+stopShooting : Hero -> Hero
+stopShooting hero =
+    let
+        animation =
+            hero.shootingAnimation
+
+        newAnimation =
+            { animation | isActive = False }
+    in
+    { hero | shootingAnimation = newAnimation }
+
+
+{-| make the hero shoot a bullet
+-}
 shootBullet : Hero -> HeroBullet
 shootBullet hero =
-    HeroBullet (moveBy ( heroWidth // 2, -bulletHeight ) hero.pos) 0 -5
+    HeroBullet hero.pos 0 -10
 
 
+{-| animate the hero bullets for a new frame
+-}
 animateHeroBullets :
     { a | heroBullets : List HeroBullet }
     -> { a | heroBullets : List HeroBullet }
@@ -176,12 +280,13 @@ animateHeroBullets ({ heroBullets } as model) =
     { model | heroBullets = newBullets }
 
 
+animateHeroBullet : HeroBullet -> HeroBullet
 animateHeroBullet bullet =
     let
         ( x, y ) =
-            bullet.posBullet
+            bullet.pos
     in
-    { bullet | posBullet = ( x, y + bullet.dy ) }
+    { bullet | pos = ( x, y + bullet.dy ) }
 
 
 direction : Hero -> Dir
@@ -215,22 +320,27 @@ direction { moveLeft, moveRight, moveUp, moveDown } =
             None
 
 
+{-| draw the hero's bullets
+-}
 drawHeroBullets : List HeroBullet -> List (Svg Msg)
-drawHeroBullets enemyBullets =
-    enemyBullets |> List.map drawHeroBullet
+drawHeroBullets heroBullets =
+    heroBullets |> List.map drawHeroBullet
 
 
 drawHeroBullet : HeroBullet -> Svg Msg
 drawHeroBullet bullet =
     let
         ( x, y ) =
-            bullet.posBullet
+            bullet.pos
     in
-    Svg.rect
+    Svg.svg
         [ SvgAttr.x <| String.fromInt x
         , SvgAttr.y <| String.fromInt y
-        , SvgAttr.fill "green"
-        , SvgAttr.width <| String.fromInt bulletWidth
-        , SvgAttr.height <| String.fromInt bulletHeight
         ]
-        []
+        [ Svg.use
+            [ SvgAttr.width <| String.fromInt bulletWidth
+            , SvgAttr.height <| String.fromInt bulletHeight
+            , SvgAttr.xlinkHref "assets/hero_bullet.svg#hero_bullet"
+            ]
+            []
+        ]

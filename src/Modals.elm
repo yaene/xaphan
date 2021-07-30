@@ -1,11 +1,15 @@
 module Modals exposing (ModalType(..), drawModal)
 
-import Html exposing (Html, button, div, text)
+import Html exposing (Html, div, text)
 import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 import Messages exposing (Msg(..))
+import StyledComponents
 
 
+{-| specifies the type of modal.
+used to decide how to render a given modal.
+-}
 type ModalType
     = PauseMenu
     | ClearedMessage
@@ -14,22 +18,25 @@ type ModalType
     | ControlsInfo
 
 
+{-| render a modal of a given type
+-}
 drawModal : ModalType -> Html Msg
 drawModal modalType =
     case modalType of
         PauseMenu ->
             drawModal_ "Pause Menu"
                 ""
-                [ ( "Resume", Resume )
-                , ( "Skip Level", NextLevel )
+                [ ( "Skip Level", NextLevel )
                 , ( "Restart Level", Retry )
+                , ( "Main Menu", Reset )
+                , ( "Resume", Resume )
                 ]
 
         ClearedMessage ->
             drawModal_ "Level Cleared" "Congrats you cleared the level!" [ ( "Next Level", NextLevel ) ]
 
         WonMessage ->
-            drawModal_ "You Won :-)" "Congrats you have cleared the whole game!" []
+            drawModal_ "You Won :-)" "Congrats you have cleared the whole game!" [ ( "Main Menu", Reset ) ]
 
         LostMessage ->
             drawModal_ "Game Over :-(" "Better luck next time!" [ ( "Try again", Retry ) ]
@@ -44,6 +51,14 @@ drawModal modalType =
 
 drawModal_ : String -> String -> List ( String, Msg ) -> Html Msg
 drawModal_ title content actions =
+    let
+        contentDisplay =
+            if String.isEmpty content then
+                "none"
+
+            else
+                "block"
+    in
     div
         [ style "position" "fixed"
         , style "left" "0"
@@ -57,13 +72,15 @@ drawModal_ title content actions =
         ]
         [ div
             [ style "display" "flex"
+            , style "color" "white"
             , style "flex-direction" "column"
             , style "align-items" "center"
-            , style "background-color" "white"
-            , style "border-radius" "10px"
-            , style "min-height" "100px"
-            , style "width" "200px"
-            , style "padding" "10px 20px 10px 20px"
+            , style "justify-content" "space-evenly"
+            , style "background-color" "#333333"
+            , style "border-radius" "15px"
+            , style "min-height" "200px"
+            , style "width" "300px"
+            , style "padding" "20px"
             ]
             [ div
                 [ style "margin-bottom" "10px"
@@ -73,12 +90,12 @@ drawModal_ title content actions =
                 [ text title ]
             , div
                 [ style "margin-bottom" "10px"
-                , style "font-size" "12px"
+                , style "font-size" "15px"
+                , style "display" contentDisplay
                 ]
                 [ text content ]
             , div
                 [ style "display" "flex"
-                , style "flex-grow" "1"
                 , style "flex-direction" "column"
                 , style "justify-content" "center"
                 ]
@@ -89,8 +106,4 @@ drawModal_ title content actions =
 
 modalButton : ( String, Msg ) -> Html Msg
 modalButton ( content, msg ) =
-    button
-        [ onClick msg
-        , style "margin-bottom" "10px"
-        ]
-        [ text content ]
+    StyledComponents.button content msg [ style "margin-bottom" "10px" ]

@@ -1,6 +1,6 @@
 module Collision exposing (checkCollision)
 
-import Enemy exposing (Enemy, EnemyBullet, enemyHeight, enemyWidth)
+import Enemy exposing (Enemy, EnemyBullet, EnemyType(..), enemyHeight, enemyWidth)
 import Field exposing (Pos)
 import Hero exposing (Hero, HeroBullet, heroHeight, heroWidth)
 import List
@@ -11,6 +11,8 @@ isHeroHit hero bullets =
     bullets |> List.any (isBulletCollidingHero hero)
 
 
+{-| check for collisions in the model and update accordingly
+-}
 checkCollision :
     { a
         | enemies : List Enemy
@@ -32,7 +34,11 @@ checkCollision model =
 
 
 isBulletCollidingHero : Hero -> EnemyBullet -> Bool
-isBulletCollidingHero { pos } { posBullet } =
+isBulletCollidingHero { pos } bullet =
+    let
+        posBullet =
+            bullet.pos
+    in
     isColliding ( pos, ( heroWidth, heroHeight ) ) ( posBullet, ( Enemy.bulletWidth, Enemy.bulletHeight ) )
 
 
@@ -48,8 +54,12 @@ isEnemyHit enemy bullets =
 
 
 isBulletCollidingEnemy : Enemy -> HeroBullet -> Bool
-isBulletCollidingEnemy { pos } { posBullet } =
-    isColliding ( pos, ( enemyWidth, enemyHeight ) ) ( posBullet, ( Hero.bulletWidth, Hero.bulletHeight ) )
+isBulletCollidingEnemy { pos, enemyType } bullet =
+    let
+        bulletPos =
+            bullet.pos
+    in
+    isColliding ( pos, ( enemyWidth enemyType, enemyHeight enemyType ) ) ( bulletPos, ( Hero.bulletWidth, Hero.bulletHeight ) )
 
 
 collideBulletsEnemies :
@@ -90,10 +100,9 @@ collideBulletsHero ({ hero, enemyBullets } as model) =
         model
 
 
-
 reduceEnemyHealth : Enemy -> List HeroBullet -> Enemy
 reduceEnemyHealth enemy heroBullets =
-    if isEnemyHit enemy heroBullets then
+    if isEnemyHit enemy heroBullets && enemy.enemyType /= Environmental then
         { enemy | hp = enemy.hp - 1 }
 
     else

@@ -4,15 +4,17 @@ import Browser
 import Browser.Events exposing (onAnimationFrameDelta, onKeyDown, onKeyUp)
 import Collision exposing (checkCollision)
 import Dir exposing (Dir(..))
-import Enemy exposing (Enemy, EnemyBullet, animateEnemies, changeDirCmds, changeEnemyDir, drawBullets, drawEnemies)
+import Enemy exposing (Enemy, EnemyBullet, EnemyType(..), animateEnemies, changeDirCmds, changeEnemyDir, drawBullets, drawEnemies)
+import Field exposing (filterOutOfBounds)
 import Hero exposing (..)
-import Html exposing (Html, button, div, text)
+import Html exposing (Html, div)
 import Html.Attributes as HtmlAttr
-import Html.Events exposing (keyCode, onClick)
+import Html.Events exposing (keyCode)
 import Json.Decode
 import Levels exposing (Level, loadLevel)
 import Messages exposing (Msg(..))
 import Modals exposing (ModalType(..), drawModal)
+import StyledComponents
 import Svg
 import Svg.Attributes as SvgAttr
 
@@ -36,6 +38,8 @@ type State
     | GameOver
 
 
+{-| the game's main program
+-}
 main : Program () Model Msg
 main =
     Browser.element
@@ -54,6 +58,13 @@ init _ =
 view : Model -> Html.Html Msg
 view model =
     let
+        backgroundUrl =
+            if model.state == Initial then
+                "url(/assets/Initial_Page.jpg)"
+
+            else
+                "url(/assets/background.jpg)"
+
         content =
             case model.state of
                 Initial ->
@@ -68,7 +79,7 @@ view model =
                         (drawHero model.hero
                             :: (drawEnemies model.enemies
                                     ++ drawBullets model.enemyBullets
-                                    ++ drawBullets model.heroBullets
+                                    ++ drawHeroBullets model.heroBullets
                                )
                         )
                     ]
@@ -88,12 +99,16 @@ view model =
     Html.div
         [ HtmlAttr.style "display" "flex"
         , HtmlAttr.style "justify-content" "center"
+        , HtmlAttr.style "background-color" "black"
         ]
         [ Html.div
             [ HtmlAttr.style "display" "flex"
             , HtmlAttr.style "width" "100vh"
             , HtmlAttr.style "height" "100vh"
-            , HtmlAttr.style "background-color" "gray"
+            , HtmlAttr.style "background-image" backgroundUrl
+            , HtmlAttr.style "background-size" "contain"
+            , HtmlAttr.style "background-repeat" "no-repeat"
+            , HtmlAttr.style "background-position" "center"
             , HtmlAttr.style "justify-content" "center"
             ]
             content
@@ -110,8 +125,8 @@ drawInitialPage =
         , HtmlAttr.style "height" "80px"
         , HtmlAttr.style "justify-content" "space-evenly"
         ]
-        [ button [ onClick NextLevel ] [ text "New Game" ]
-        , button [ onClick ShowControls ] [ text "Controls" ]
+        [ StyledComponents.button "New Game" NextLevel [ HtmlAttr.style "margin-bottom" "20px" ]
+        , StyledComponents.button "Controls" ShowControls []
         ]
 
 
@@ -161,19 +176,11 @@ key on keycode =
 
         -- key: z
         90 ->
-            if on then
-                HeroShootBullet
-
-            else
-                Noop
+            HeroShootBullet on
 
         -- key: SPACE
         32 ->
-            if on then
-                HeroShootBullet
-
-            else
-                Noop
+            HeroShootBullet on
 
         -- key: ESC
         27 ->
@@ -210,10 +217,14 @@ update msg model =
             , Cmd.none
             )
 
-        HeroShootBullet ->
-            ( { model | heroBullets = shootBullet hero :: model.heroBullets }
-            , Cmd.none
-            )
+        HeroShootBullet isActive ->
+            if isActive then
+                ( Hero.startShooting model
+                , Cmd.none
+                )
+
+            else
+                ( { model | hero = Hero.stopShooting hero }, Cmd.none )
 
         Tick elapsed ->
             model |> animate elapsed
@@ -229,7 +240,11 @@ update msg model =
             ( { newModel | enemies = loadLevel <| model.level + 1, state = Playing, level = model.level + 1 }, Cmd.none )
 
         Pause ->
-            ( { model | state = Paused }, Cmd.none )
+            if model.state == Playing then
+                ( { model | state = Paused }, Cmd.none )
+
+            else
+                ( model, Cmd.none )
 
         Resume ->
             ( { model | state = Playing }, Cmd.none )
@@ -259,6 +274,7 @@ animate elapsed model =
                 |> animateEnemies elapsed
                 |> animateHero elapsed
                 |> checkCollision
+                |> filterBulletsOutOfBounds
                 |> newState
                 |> changeDirCmds elapsed
 
@@ -266,12 +282,24 @@ animate elapsed model =
             ( model, Cmd.none )
 
 
+filterBulletsOutOfBounds : Model -> Model
+filterBulletsOutOfBounds model =
+    let
+        filteredBullets =
+            model |> (.enemyBullets >> filterOutOfBounds)
+
+        filteredHeroBullets =
+            model |> (.heroBullets >> filterOutOfBounds)
+    in
+    { model | enemyBullets = filteredBullets, heroBullets = filteredHeroBullets }
+
+
 newState : Model -> Model
 newState model =
     if model.hero.hp <= 0 then
         { model | state = GameOver }
 
-    else if List.isEmpty model.enemies then
+    else if isLevelCleared model.enemies then
         case model.state of
             Playing ->
                 { model | state = Cleared }
@@ -281,3 +309,10 @@ newState model =
 
     else
         model
+
+
+isLevelCleared : List Enemy -> Bool
+isLevelCleared enemies =
+    enemies
+        |> (List.filter <| .enemyType >> (/=) Environmental)
+        |> List.isEmpty

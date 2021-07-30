@@ -1,6 +1,7 @@
 module Enemy exposing
     ( Enemy
     , EnemyBullet
+    , EnemyType(..)
     , animateEnemies
     , bulletHeight
     , bulletWidth
@@ -10,69 +11,159 @@ module Enemy exposing
     , drawEnemies
     , enemyHeight
     , enemyWidth
+    , finalBoss
     , newBasicEnemy
+    , newEnvironmentalEnemy
     , newSpiralEnemy
     , newSunEnemy
     )
 
-import Animation exposing (Animation, newAnimation, newAnimationWithSub, updateAnimation)
+import Animation exposing (Animation, newAnimation, newAnimationWithDelay, updateAnimation)
 import Dir exposing (Dir(..))
 import Field exposing (Pos, inBoundsX, moveBy)
 import Messages exposing (Msg(..))
-import Svg exposing (Svg, rect)
+import Svg exposing (Svg)
 import Svg.Attributes as SvgAttr
 
 
-enemyWidth =
-    80
+{-| The hitbox width of the enemy
+-}
+enemyWidth : EnemyType -> number
+enemyWidth enemyType =
+    if enemyType == Final then
+        100
+
+    else
+        80
 
 
-enemyHeight =
-    80
+{-| The hitbox height of the enemy
+-}
+enemyHeight : EnemyType -> number
+enemyHeight enemyType =
+    if enemyType == Final then
+        160
+
+    else
+        80
 
 
+{-| The hitbox width of the enemy bullet
+-}
+bulletWidth : number
 bulletWidth =
+    5
+
+
+{-| The hitbox height of the enemy bullet
+-}
+bulletHeight : number
+bulletHeight =
     10
 
 
-bulletHeight =
-    20
+{-| The different types of enemies.
+Use in case differentiating between different types is needed
+-}
+type EnemyType
+    = Basic
+    | Sun
+    | Final
+    | Spiral
+    | Environmental
 
 
-type alias Enemy =
-    { pos : Pos
-    , hp : Int
-    , dir : Dir
-    , changeDirAnimation : Animation
-    , triggerShootAnimaton : Animation
-    , shootBulletFunc : Int -> Pos -> List EnemyBullet
+type alias SubShootAnimation =
+    { shootFunc : Int -> { pos : Pos, enemyType : EnemyType } -> List EnemyBullet
+    , animation : Animation
     }
 
 
+{-| Contains all data needed to animate an enemy.
+-}
+type alias Enemy =
+    { pos : Pos
+    , hp : Int
+    , maxHp : Int
+    , dir : Dir
+    , changeDirAnimation : Animation
+    , triggerShootAnimation : Animation
+    , enemyType : EnemyType
+    , subShootAnimation : Maybe SubShootAnimation
+    }
+
+
+{-| Contains all data needed to animate an enemy bullet
+-}
 type alias EnemyBullet =
-    { posBullet : Pos, dx : Int, dy : Int }
+    { pos : Pos, dx : Int, dy : Int }
 
 
+bulletSpeed : Float
+bulletSpeed =
+    10
+
+
+defaultHP : Int
+defaultHP =
+    15
+
+
+{-| Create a basic enemy that only shoots straight down
+-}
 newBasicEnemy : Pos -> Dir -> Enemy
 newBasicEnemy pos dir =
-    Enemy pos 5 dir (newAnimation 1500) (newAnimation 1000) shootBullet
+    Enemy pos defaultHP defaultHP dir (newAnimation 1500 0) (newAnimation 1000 0) Basic Nothing
 
 
+{-| Create an enemy that shoots in a few directions at once
+-}
 newSunEnemy : Pos -> Dir -> Enemy
 newSunEnemy pos dir =
-    Enemy pos 5 dir (newAnimation 1500) (newAnimation 1000) shootSunBullets
+    Enemy pos defaultHP defaultHP dir (newAnimation 1500 0) (newAnimation 1000 0) Sun Nothing
 
 
-newSpiralEnemy : Pos -> Dir -> Enemy
-newSpiralEnemy pos dir =
-    Enemy pos 5 dir (newAnimation 1500) (newAnimationWithSub 1000 20 20) shootSpiralBullet
+{-| Create an "fake" enemy that shoots in circles and doesnt show on the screen.
+Use to add shooting animation without an enemy.
+-}
+newEnvironmentalEnemy : Pos -> Float -> Enemy
+newEnvironmentalEnemy pos delay =
+    Enemy pos 1 1 None (newAnimation 0 -1) (newAnimationWithDelay delay 1000 0) Environmental Nothing
 
 
+{-| Create an enemy that shoots in a Spiral
+-}
+newSpiralEnemy : Pos -> Dir -> Float -> Enemy
+newSpiralEnemy pos dir startElapsed =
+    Enemy pos
+        defaultHP
+        defaultHP
+        dir
+        (newAnimation 1500 0)
+        (Animation startElapsed 1500 False True 0 0)
+        Spiral
+    <|
+        Just <|
+            SubShootAnimation shootSpiralBullet <|
+                newAnimation 20 20
+
+
+{-| Create a "final boss" that switches between different shooting patterns
+-}
+finalBoss : Pos -> Dir -> Enemy
+finalBoss pos dir =
+    Enemy pos 30 30 dir (newAnimation 1500 0) (newAnimation 1000 0) Final Nothing
+
+
+{-| Draw all the enemies in a list
+-}
 drawEnemies : List Enemy -> List (Svg Msg)
 drawEnemies enemies =
     enemies |> List.map drawEnemy
 
 
+{-| Draw all the enemy bullets in a list
+-}
 drawBullets : List EnemyBullet -> List (Svg Msg)
 drawBullets enemyBullets =
     enemyBullets |> List.map drawBullet
@@ -82,18 +173,22 @@ drawBullet : EnemyBullet -> Svg Msg
 drawBullet bullet =
     let
         ( x, y ) =
-            bullet.posBullet
+            bullet.pos
     in
-    Svg.rect
-        [ SvgAttr.x <| String.fromInt x
-        , SvgAttr.y <| String.fromInt y
-        , SvgAttr.fill "red"
-        , SvgAttr.width <| String.fromInt bulletWidth
-        , SvgAttr.height <| String.fromInt bulletHeight
+    Svg.ellipse
+        [ SvgAttr.cx <| String.fromInt x
+        , SvgAttr.cy <| String.fromInt y
+        , SvgAttr.ry <| String.fromInt bulletHeight
+        , SvgAttr.rx <| String.fromInt bulletWidth
+        , SvgAttr.fill "white"
+        , SvgAttr.stroke "orange"
+        , SvgAttr.strokeWidth "5"
         ]
         []
 
 
+{-| animate all the enemies in a list (Tick)
+-}
 animateEnemies :
     Float
     -> { a | enemies : List Enemy, enemyBullets : List EnemyBullet }
@@ -104,6 +199,8 @@ animateEnemies elapsed model =
         |> animateEnemyBullets
 
 
+{-| generate random direction commands for all enemies that should change direction
+-}
 changeDirCmds : Float -> { a | enemies : List Enemy } -> ( { a | enemies : List Enemy }, Cmd Msg )
 changeDirCmds elapsed ({ enemies } as model) =
     let
@@ -145,27 +242,38 @@ animateEnemyBullets model =
     { model | enemyBullets = newBullets }
 
 
-shootSunBullets : Int -> Pos -> List EnemyBullet
-shootSunBullets _ shooterPos =
+shootSunBullets : Int -> { a | pos : Pos, enemyType : EnemyType } -> List EnemyBullet
+shootSunBullets offset { pos, enemyType } =
     List.range 0 7
         |> List.map
             (\i ->
-                EnemyBullet (moveBy ( round <| enemyWidth / 2, round <| enemyHeight / 2 ) shooterPos)
-                    (round <| (15 * cos ((i |> toFloat) * pi / 4)))
-                    (round <| (15 * sin ((i |> toFloat) * pi / 4)))
+                EnemyBullet (moveBy ( round <| enemyWidth enemyType / 2, round <| enemyHeight enemyType / 2 ) pos)
+                    (round <| (bulletSpeed * cos ((i |> toFloat) * pi / 4 + (offset |> toFloat) * pi / 10)))
+                    (round <| (bulletSpeed * sin ((i |> toFloat) * pi / 4 + (offset |> toFloat) * pi / 10)))
             )
 
 
-shootBullet : Int -> Pos -> List EnemyBullet
-shootBullet _ shooterPos =
-    [ EnemyBullet (moveBy ( round <| enemyWidth / 2, enemyHeight ) shooterPos) 0 5 ]
+shootCircleBullets : Int -> { a | pos : Pos, enemyType : EnemyType } -> List EnemyBullet
+shootCircleBullets _ { pos, enemyType } =
+    List.range 0 15
+        |> List.map
+            (\i ->
+                EnemyBullet (moveBy ( round <| enemyWidth enemyType / 2, round <| enemyHeight enemyType / 2 ) pos)
+                    (round <| (bulletSpeed * cos ((i |> toFloat) * pi / 8)))
+                    (round <| (bulletSpeed * sin ((i |> toFloat) * pi / 8)))
+            )
 
 
-shootSpiralBullet : Int -> Pos -> List EnemyBullet
-shootSpiralBullet count shooterPos =
-    [ EnemyBullet (moveBy ( round <| enemyWidth / 2, round <| enemyHeight / 2 ) shooterPos)
-        (round <| (15 * cos ((count |> toFloat) * pi / 10)))
-        (round <| (15 * sin ((count |> toFloat) * pi / 10)))
+shootBullet : Int -> { a | pos : Pos, enemyType : EnemyType } -> List EnemyBullet
+shootBullet _ { pos, enemyType } =
+    [ EnemyBullet (moveBy ( round <| enemyWidth enemyType / 2, enemyHeight enemyType ) pos) 0 <| round bulletSpeed ]
+
+
+shootSpiralBullet : Int -> { a | pos : Pos, enemyType : EnemyType } -> List EnemyBullet
+shootSpiralBullet count { pos, enemyType } =
+    [ EnemyBullet (moveBy ( round <| enemyWidth enemyType / 2, round <| enemyHeight enemyType / 2 ) pos)
+        (round <| (bulletSpeed * cos ((count |> toFloat) * pi / 10)))
+        (round <| (bulletSpeed * sin ((count |> toFloat) * pi / 10)))
     ]
 
 
@@ -173,11 +281,13 @@ animateEnemyBullet : EnemyBullet -> EnemyBullet
 animateEnemyBullet bullet =
     let
         ( x, y ) =
-            bullet.posBullet
+            bullet.pos
     in
-    { bullet | posBullet = ( x + bullet.dx, y + bullet.dy ) }
+    { bullet | pos = ( x + bullet.dx, y + bullet.dy ) }
 
 
+{-| change an enemies direction at an index
+-}
 changeEnemyDir : Int -> Dir -> List Enemy -> List Enemy
 changeEnemyDir index dir enemies =
     enemies
@@ -199,26 +309,114 @@ animateEnemy elapsed enemy =
 
 
 animateShootBullet : Float -> Enemy -> ( Enemy, List EnemyBullet )
-animateShootBullet elapsed enemy =
+animateShootBullet elapsed enemy_ =
     let
         newAnimation =
-            updateAnimation enemy.triggerShootAnimaton elapsed
+            updateAnimation enemy_.triggerShootAnimation elapsed
 
-        bullets =
-            case newAnimation.subAnimation of
-                Nothing ->
-                    triggerShoot newAnimation enemy
-
-                Just sub ->
-                    triggerShoot sub enemy
+        enemy =
+            { enemy_ | triggerShootAnimation = newAnimation }
     in
-    ( { enemy | triggerShootAnimaton = newAnimation }, bullets )
+    case enemy.enemyType of
+        Final ->
+            animateFinalBoss elapsed enemy
+
+        Spiral ->
+            animateSpiralEnemy elapsed enemy
+
+        Basic ->
+            ( enemy, triggerShoot newAnimation <| shootBullet 0 enemy )
+
+        Sun ->
+            ( enemy, triggerShoot newAnimation <| shootSunBullets 0 enemy )
+
+        Environmental ->
+            ( enemy, triggerShoot newAnimation <| shootCircleBullets 0 enemy )
 
 
-triggerShoot : { a | shouldTrigger : Bool, triggerCount : Int } -> Enemy -> List EnemyBullet
-triggerShoot animation enemy =
+animateSpiralEnemy : Float -> Enemy -> ( Enemy, List EnemyBullet )
+animateSpiralEnemy elapsed enemy =
+    let
+        mainAnimation =
+            enemy.triggerShootAnimation
+    in
+    case enemy.subShootAnimation of
+        Just subShootAnimation ->
+            let
+                sub =
+                    subShootAnimation.animation
+
+                newSub =
+                    if sub.isActive then
+                        updateAnimation sub elapsed
+
+                    else if mainAnimation.shouldTrigger then
+                        { sub | isActive = True }
+
+                    else
+                        sub
+
+                newSubShoot =
+                    { subShootAnimation | animation = newSub }
+
+                newBullets =
+                    triggerShoot sub (shootSpiralBullet sub.triggerCount enemy)
+            in
+            ( { enemy | subShootAnimation = Just newSubShoot }, newBullets )
+
+        Nothing ->
+            ( enemy, [] )
+
+
+animateFinalBoss : Float -> Enemy -> ( Enemy, List EnemyBullet )
+animateFinalBoss elapsed enemy_ =
+    let
+        { triggerShootAnimation } =
+            enemy_
+
+        enemy =
+            if triggerShootAnimation.shouldTrigger then
+                case triggerShootAnimation.triggerCount |> modBy 3 of
+                    0 ->
+                        { enemy_
+                            | subShootAnimation =
+                                Just <|
+                                    SubShootAnimation shootSpiralBullet <|
+                                        newAnimation 40 20
+                        }
+
+                    1 ->
+                        { enemy_ | subShootAnimation = Just <| SubShootAnimation shootSunBullets <| newAnimation 200 4 }
+
+                    2 ->
+                        { enemy_ | subShootAnimation = Just <| SubShootAnimation shootCircleBullets <| newAnimation 100 8 }
+
+                    _ ->
+                        enemy_
+
+            else
+                enemy_
+    in
+    case enemy.subShootAnimation of
+        Just { shootFunc, animation } ->
+            let
+                newSub =
+                    updateAnimation animation elapsed
+
+                newBullets =
+                    triggerShoot animation
+                        (shootFunc animation.triggerCount { pos = enemy.pos, enemyType = enemy.enemyType })
+            in
+            ( { enemy | subShootAnimation = Just <| SubShootAnimation shootFunc newSub }, newBullets )
+
+        Nothing ->
+            ( enemy, [] )
+
+
+triggerShoot : Animation -> List EnemyBullet -> List EnemyBullet
+triggerShoot animation shootFunc =
     if animation.shouldTrigger then
-        enemy.shootBulletFunc animation.triggerCount enemy.pos
+        shootFunc
 
     else
         []
@@ -256,7 +454,7 @@ moveEnemy enemy =
         newX =
             x + dirFactor * dx
     in
-    if inBoundsX ( newX, y ) enemyWidth then
+    if inBoundsX ( newX, y ) <| enemyWidth enemy.enemyType then
         { enemy | pos = ( newX, y ) }
 
     else
@@ -268,12 +466,55 @@ drawEnemy enemy =
     let
         ( x, y ) =
             enemy.pos
+
+        display =
+            if enemy.enemyType == Environmental then
+                "none"
+
+            else
+                "inline"
+
+        svgSrc =
+            if enemy.enemyType == Final then
+                "assets/boss.svg#boss"
+
+            else
+                "assets/monster.svg#monster"
     in
-    Svg.use
+    Svg.svg
         [ SvgAttr.x <| String.fromInt x
         , SvgAttr.y <| String.fromInt y
-        , SvgAttr.xlinkHref "assets/monster.svg#monster"
-        , SvgAttr.width <| String.fromInt enemyWidth
-        , SvgAttr.height <| String.fromInt enemyHeight
+        , SvgAttr.height <| String.fromInt <| enemyHeight enemy.enemyType + 5
+        , SvgAttr.display display
         ]
-        []
+        [ Svg.use
+            [ SvgAttr.xlinkHref svgSrc
+            , SvgAttr.width <| String.fromInt <| enemyWidth enemy.enemyType
+            , SvgAttr.height <| String.fromInt <| enemyHeight enemy.enemyType
+            , SvgAttr.y <| String.fromInt 5
+            ]
+            []
+        , drawHpBar enemy
+        ]
+
+
+drawHpBar : Enemy -> Svg Msg
+drawHpBar { hp, maxHp, enemyType } =
+    let
+        barWidth =
+            enemyWidth enemyType // maxHp
+
+        bars =
+            List.range 0 (hp - 1)
+                |> List.map
+                    (\i ->
+                        Svg.rect
+                            [ SvgAttr.width <| String.fromInt barWidth
+                            , SvgAttr.height <| String.fromInt 5
+                            , SvgAttr.fill "orange"
+                            , SvgAttr.x <| String.fromInt <| i * (barWidth + 1)
+                            ]
+                            []
+                    )
+    in
+    Svg.svg [] bars
