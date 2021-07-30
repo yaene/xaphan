@@ -111,13 +111,14 @@ animateHero _ model =
 -}
 drawHero : Hero -> Svg msg
 drawHero hero =
-    Svg.g []
-        [ Svg.rect
-            [ SvgAttr.x <| String.fromInt <| Tuple.first hero.pos
-            , SvgAttr.y <| String.fromInt <| Tuple.second hero.pos
-            , SvgAttr.height <| String.fromInt heroHeight
-            , SvgAttr.width <| String.fromInt heroWidth
-            , SvgAttr.fill "blue"
+    Svg.svg
+        []
+        [ Svg.use
+            [ SvgAttr.height <| String.fromInt 110
+            , SvgAttr.width <| String.fromInt 55
+            , SvgAttr.xlinkHref "assets/hero.svg#hero"
+            , SvgAttr.x <| String.fromInt <| Tuple.first hero.pos - 5
+            , SvgAttr.y <| String.fromInt <| Tuple.second hero.pos - 10
             ]
             []
         , drawLives hero.hp
@@ -203,7 +204,7 @@ startMove hero =
 -}
 shootBullet : Hero -> HeroBullet
 shootBullet hero =
-    HeroBullet (moveBy ( heroWidth // 2, -bulletHeight ) hero.pos) 0 -5
+    HeroBullet hero.pos 0 -5
 
 
 {-| animate the hero bullets for a new frame
@@ -273,11 +274,14 @@ drawHeroBullet bullet =
         ( x, y ) =
             bullet.posBullet
     in
-    Svg.rect
+    Svg.svg
         [ SvgAttr.x <| String.fromInt x
         , SvgAttr.y <| String.fromInt y
-        , SvgAttr.fill "blue"
-        , SvgAttr.width <| String.fromInt bulletWidth
-        , SvgAttr.height <| String.fromInt bulletHeight
         ]
-        []
+        [ Svg.use
+            [ SvgAttr.width <| String.fromInt bulletWidth
+            , SvgAttr.height <| String.fromInt bulletHeight
+            , SvgAttr.xlinkHref "assets/hero_bullet.svg#hero_bullet"
+            ]
+            []
+        ]

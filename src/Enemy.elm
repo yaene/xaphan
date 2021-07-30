@@ -53,14 +53,14 @@ enemyHeight enemyType =
 -}
 bulletWidth : number
 bulletWidth =
-    10
+    15
 
 
 {-| The hitbox height of the enemy bullet
 -}
 bulletHeight : number
 bulletHeight =
-    20
+    25
 
 
 {-| The different types of enemies.
@@ -171,14 +171,17 @@ drawBullet bullet =
         ( x, y ) =
             bullet.pos
     in
-    Svg.rect
+    Svg.svg
         [ SvgAttr.x <| String.fromInt x
         , SvgAttr.y <| String.fromInt y
-        , SvgAttr.fill "red"
-        , SvgAttr.width <| String.fromInt bulletWidth
-        , SvgAttr.height <| String.fromInt bulletHeight
         ]
-        []
+        [ Svg.use
+            [ SvgAttr.xlinkHref "assets/enemy_bullet.svg#enemy_bullet"
+            , SvgAttr.width <| String.fromInt bulletWidth
+            , SvgAttr.height <| String.fromInt bulletHeight
+            ]
+            []
+        ]
 
 
 {-| animate all the enemies in a list (Tick)
