@@ -98,7 +98,7 @@ view model =
             [ HtmlAttr.style "display" "flex"
             , HtmlAttr.style "width" "100vh"
             , HtmlAttr.style "height" "100vh"
-            , HtmlAttr.style "background-image" "url(/assets/Background_1.png.png)"
+            , HtmlAttr.style "background-image" "url(/assets/background.png)"
             , HtmlAttr.style "justify-content" "center"
             ]
             content
