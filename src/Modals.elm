@@ -16,6 +16,7 @@ type ModalType
     | WonMessage
     | LostMessage
     | ControlsInfo
+    | SelectionPage
 
 
 {-| render a modal of a given type
@@ -44,9 +45,13 @@ drawModal modalType =
         ControlsInfo ->
             drawModal_ "Controls"
                 ("Move with arrow keys (or WASD) and shoot with Z (or SPACE). "
+                    ++ "Use X to launch a superpower of your selection."
                     ++ "Dodge the enemies bullets and kill them with yours to win!"
                 )
                 [ ( "Ok", Reset ) ]
+
+        SelectionPage ->
+            drawModal_ "Select the superpower you want to use" "Superpower 1: clear all enemy bullets\nSuperpower 2: Hero ATK double for 5 seconds" [ ( "Superpower 1", SelectSuperpower 1 ), ( "Superpower 2", SelectSuperpower 2 ) ]
 
 
 drawModal_ : String -> String -> List ( String, Msg ) -> Html Msg
