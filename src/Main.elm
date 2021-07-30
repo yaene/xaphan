@@ -287,8 +287,11 @@ filterBulletsOutOfBounds model =
     let
         filteredBullets =
             model |> (.enemyBullets >> filterOutOfBounds)
+
+        filteredHeroBullets =
+            model |> (.heroBullets >> filterOutOfBounds)
     in
-    { model | enemyBullets = filteredBullets }
+    { model | enemyBullets = filteredBullets, heroBullets = filteredHeroBullets }
 
 
 newState : Model -> Model

@@ -40,7 +40,7 @@ type alias Hero =
 {-| contains all the data for animating a hero bullet
 -}
 type alias HeroBullet =
-    { posBullet : Pos
+    { pos : Pos
     , dx : Int
     , dy : Int
     }
@@ -284,9 +284,9 @@ animateHeroBullet : HeroBullet -> HeroBullet
 animateHeroBullet bullet =
     let
         ( x, y ) =
-            bullet.posBullet
+            bullet.pos
     in
-    { bullet | posBullet = ( x, y + bullet.dy ) }
+    { bullet | pos = ( x, y + bullet.dy ) }
 
 
 direction : Hero -> Dir
@@ -331,7 +331,7 @@ drawHeroBullet : HeroBullet -> Svg Msg
 drawHeroBullet bullet =
     let
         ( x, y ) =
-            bullet.posBullet
+            bullet.pos
     in
     Svg.svg
         [ SvgAttr.x <| String.fromInt x
