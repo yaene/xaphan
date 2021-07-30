@@ -112,13 +112,13 @@ animateHero _ model =
 drawHero : Hero -> Svg msg
 drawHero hero =
     Svg.svg
-        [ SvgAttr.x <| String.fromInt <| Tuple.first hero.pos - 5
-        , SvgAttr.y <| String.fromInt <| Tuple.second hero.pos - 10
-        ]
+        []
         [ Svg.use
             [ SvgAttr.height <| String.fromInt 110
             , SvgAttr.width <| String.fromInt 55
             , SvgAttr.xlinkHref "assets/hero.svg#hero"
+            , SvgAttr.x <| String.fromInt <| Tuple.first hero.pos - 5
+            , SvgAttr.y <| String.fromInt <| Tuple.second hero.pos - 10
             ]
             []
         , drawLives hero.hp
