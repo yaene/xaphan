@@ -11,7 +11,6 @@ module Hero exposing
     , heroHeight
     , heroWidth
     , init
-    , moveHero
     , selectSuperPower
     , setSuperpower
     , shootBullet
@@ -39,7 +38,7 @@ type alias Hero =
     , heroDir : Dir
     , spSelection : Int
     , spInstance : Int
-    , spElapsed : Int
+    , spElapsed : Float
     , atkDoubled : Bool
     }
 
@@ -125,7 +124,7 @@ deactivateAtkDouble elapsed model =
             model.hero.atkDoubled
 
         nElapsed =
-            model.hero.spElapsed
+            model.hero.spElapsed + elapsed
     in
     if atkDoubled == False then
         model
@@ -139,7 +138,7 @@ deactivateAtkDouble elapsed model =
         { model | hero = updateElapsed model.hero nElapsed }
 
 
-updateElapsed : Hero -> Int -> Hero
+updateElapsed : Hero -> Float -> Hero
 updateElapsed hero nElapsed =
     { hero | spElapsed = hero.spElapsed + nElapsed }
 
@@ -319,22 +318,26 @@ drawHeroBullet bullet =
         ]
         []
 
-
+{-| return player superpower selection to the function that calls it
+-}
 selectSuperPower : Hero -> Int
 selectSuperPower hero =
     hero.spSelection
 
-
+{-| set superpower from player selection
+-}
 setSuperpower : Hero -> Int -> Hero
 setSuperpower hero selection =
     { hero | spSelection = selection }
 
-
+{-| reduce superpower instances by 1
+-}
 useSuperpower : Hero -> Hero
 useSuperpower hero =
     { hero | spInstance = hero.spInstance - 1 }
 
-
+{-| set the ATK of the hero to be doubled
+-}
 atkDouble : Hero -> Hero
 atkDouble hero =
     { hero | atkDoubled = True }

@@ -43,6 +43,7 @@ drawModal modalType =
         ControlsInfo ->
             drawModal_ "Controls"
                 ("Move with arrow keys (or WASD) and shoot with Z (or SPACE). "
+                    ++ "Use X to launch a superpower of your selection."
                     ++ "Dodge the enemies bullets and kill them with yours to win!"
                 )
                 [ ( "Ok", Reset ) ]
