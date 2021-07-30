@@ -274,11 +274,14 @@ drawHeroBullet bullet =
         ( x, y ) =
             bullet.posBullet
     in
-    Svg.rect
+    Svg.svg
         [ SvgAttr.x <| String.fromInt x
         , SvgAttr.y <| String.fromInt y
-        , SvgAttr.fill "blue"
-        , SvgAttr.width <| String.fromInt bulletWidth
-        , SvgAttr.height <| String.fromInt bulletHeight
         ]
-        []
+        [ Svg.use
+            [ SvgAttr.width <| String.fromInt bulletWidth
+            , SvgAttr.height <| String.fromInt bulletHeight
+            , SvgAttr.xlinkHref "assets/hero_bullet.svg#hero_bullet"
+            ]
+            []
+        ]
