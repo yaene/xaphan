@@ -61,10 +61,10 @@ view model =
     let
         backgroundUrl =
             if model.state == Initial then
-                "url(/assets/Initial_Page.jpg)"
+                "url(assets/Initial_Page.jpg)"
 
             else
-                "url(/assets/background.jpg)"
+                "url(assets/background.jpg)"
 
         content =
             case model.state of
@@ -316,8 +316,11 @@ filterBulletsOutOfBounds model =
     let
         filteredBullets =
             model |> (.enemyBullets >> filterOutOfBounds)
+
+        filteredHeroBullets =
+            model |> (.heroBullets >> filterOutOfBounds)
     in
-    { model | enemyBullets = filteredBullets }
+    { model | enemyBullets = filteredBullets, heroBullets = filteredHeroBullets }
 
 
 newState : Model -> Model
