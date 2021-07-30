@@ -10,12 +10,14 @@ module Hero exposing
     , heroHeight
     , heroWidth
     , init
-    , shootBullet
     , startMove
+    , startShooting
+    , stopShooting
     )
 
+import Animation exposing (Animation, newAnimation, updateAnimation)
 import Dir exposing (Dir(..))
-import Field exposing (Pos, inBoundsDimensions, moveBy)
+import Field exposing (Pos, inBoundsDimensions)
 import Messages exposing (Msg(..))
 import Svg exposing (Svg)
 import Svg.Attributes as SvgAttr
@@ -31,6 +33,7 @@ type alias Hero =
     , moveUp : Bool
     , moveDown : Bool
     , heroDir : Dir
+    , shootingAnimation : Animation
     }
 
 
@@ -92,7 +95,8 @@ heroSpeed =
 -}
 init : () -> Hero
 init _ =
-    Hero ( 500, 800 ) 3 False False False False None
+    Hero ( 500, 800 ) 3 False False False False None <|
+        Animation 0 200 False False 0 0
 
 
 {-| animate the hero for a new frame
@@ -101,10 +105,30 @@ animateHero :
     Float
     -> { a | hero : Hero, heroBullets : List HeroBullet }
     -> { a | hero : Hero, heroBullets : List HeroBullet }
-animateHero _ model =
+animateHero elapsed model =
     model
         |> moveHero
+        |> animateShooting elapsed
         |> animateHeroBullets
+
+
+animateShooting :
+    Float
+    -> { a | hero : Hero, heroBullets : List HeroBullet }
+    -> { a | hero : Hero, heroBullets : List HeroBullet }
+animateShooting elapsed ({ hero, heroBullets } as model) =
+    let
+        updatedAnimation =
+            updateAnimation hero.shootingAnimation elapsed
+
+        newHero =
+            { hero | shootingAnimation = updatedAnimation }
+    in
+    if updatedAnimation.shouldTrigger then
+        { model | hero = newHero, heroBullets = shootBullet hero :: heroBullets }
+
+    else
+        { model | hero = newHero }
 
 
 {-| draw the hero
@@ -200,11 +224,46 @@ startMove hero =
     { hero | heroDir = direction hero }
 
 
+startShooting :
+    { a | hero : Hero, heroBullets : List HeroBullet }
+    -> { a | hero : Hero, heroBullets : List HeroBullet }
+startShooting ({ hero, heroBullets } as model) =
+    if not hero.shootingAnimation.isActive then
+        let
+            animation =
+                hero.shootingAnimation
+
+            newAnimation =
+                { animation | isActive = True, elapsed = 0 }
+
+            newHero =
+                { hero | shootingAnimation = newAnimation }
+        in
+        { model | hero = newHero, heroBullets = shootBullet hero :: heroBullets }
+
+    else
+        model
+
+
+{-| stop the shooting animation
+-}
+stopShooting : Hero -> Hero
+stopShooting hero =
+    let
+        animation =
+            hero.shootingAnimation
+
+        newAnimation =
+            { animation | isActive = False }
+    in
+    { hero | shootingAnimation = newAnimation }
+
+
 {-| make the hero shoot a bullet
 -}
 shootBullet : Hero -> HeroBullet
 shootBullet hero =
-    HeroBullet hero.pos 0 -5
+    HeroBullet hero.pos 0 -10
 
 
 {-| animate the hero bullets for a new frame

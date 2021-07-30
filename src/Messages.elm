@@ -11,7 +11,7 @@ type Msg
     | MoveHeroDown Bool
     | MoveHeroLeft Bool
     | MoveHeroRight Bool
-    | HeroShootBullet
+    | HeroShootBullet Bool
     | ChangeEnemyDir ( Int, Dir )
     | NextLevel
     | ShowControls

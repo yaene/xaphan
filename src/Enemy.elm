@@ -21,7 +21,6 @@ module Enemy exposing
 import Animation exposing (Animation, newAnimation, newAnimationWithDelay, updateAnimation)
 import Dir exposing (Dir(..))
 import Field exposing (Pos, inBoundsX, moveBy)
-import Hero exposing (shootBullet)
 import Messages exposing (Msg(..))
 import Svg exposing (Svg)
 import Svg.Attributes as SvgAttr

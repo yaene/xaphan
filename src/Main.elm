@@ -176,19 +176,11 @@ key on keycode =
 
         -- key: z
         90 ->
-            if on then
-                HeroShootBullet
-
-            else
-                Noop
+            HeroShootBullet on
 
         -- key: SPACE
         32 ->
-            if on then
-                HeroShootBullet
-
-            else
-                Noop
+            HeroShootBullet on
 
         -- key: ESC
         27 ->
@@ -225,10 +217,14 @@ update msg model =
             , Cmd.none
             )
 
-        HeroShootBullet ->
-            ( { model | heroBullets = shootBullet hero :: model.heroBullets }
-            , Cmd.none
-            )
+        HeroShootBullet isActive ->
+            if isActive then
+                ( Hero.startShooting model
+                , Cmd.none
+                )
+
+            else
+                ( { model | hero = Hero.stopShooting hero }, Cmd.none )
 
         Tick elapsed ->
             model |> animate elapsed
