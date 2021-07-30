@@ -15,11 +15,14 @@ module Hero exposing
     , setSuperpower
     , shootBullet
     , startMove
+    , startShooting
+    , stopShooting
     , useSuperpower
     )
 
+import Animation exposing (Animation, newAnimation, updateAnimation)
 import Dir exposing (Dir(..))
-import Field exposing (Pos, inBoundsDimensions, moveBy)
+import Field exposing (Pos, inBoundsDimensions)
 import Messages exposing (Msg(..))
 import Modals exposing (ModalType)
 import Svg exposing (Svg)
@@ -40,6 +43,7 @@ type alias Hero =
     , spInstance : Int
     , spElapsed : Float
     , atkDoubled : Bool
+    , shootingAnimation : Animation
     }
 
 
@@ -101,7 +105,8 @@ heroSpeed =
 -}
 init : () -> Hero
 init _ =
-    Hero ( 500, 800 ) 3 False False False False None 0 3 0 False
+    Hero ( 500, 800 ) 3 False False False False None 0 3 0 False <|
+        Animation 0 200 False False 0 0
 
 
 {-| animate the hero for a new frame
@@ -113,6 +118,7 @@ animateHero :
 animateHero elapsed model =
     model
         |> moveHero
+        |> animateShooting elapsed
         |> animateHeroBullets
         |> deactivateAtkDouble elapsed
 
@@ -143,17 +149,37 @@ updateElapsed hero nElapsed =
     { hero | spElapsed = hero.spElapsed + nElapsed }
 
 
+animateShooting :
+    Float
+    -> { a | hero : Hero, heroBullets : List HeroBullet }
+    -> { a | hero : Hero, heroBullets : List HeroBullet }
+animateShooting elapsed ({ hero, heroBullets } as model) =
+    let
+        updatedAnimation =
+            updateAnimation hero.shootingAnimation elapsed
+
+        newHero =
+            { hero | shootingAnimation = updatedAnimation }
+    in
+    if updatedAnimation.shouldTrigger then
+        { model | hero = newHero, heroBullets = shootBullet hero :: heroBullets }
+
+    else
+        { model | hero = newHero }
+
+
 {-| draw the hero
 -}
 drawHero : Hero -> Svg msg
 drawHero hero =
-    Svg.g []
-        [ Svg.rect
-            [ SvgAttr.x <| String.fromInt <| Tuple.first hero.pos
-            , SvgAttr.y <| String.fromInt <| Tuple.second hero.pos
-            , SvgAttr.height <| String.fromInt heroHeight
-            , SvgAttr.width <| String.fromInt heroWidth
-            , SvgAttr.fill "blue"
+    Svg.svg
+        []
+        [ Svg.use
+            [ SvgAttr.height <| String.fromInt 110
+            , SvgAttr.width <| String.fromInt 55
+            , SvgAttr.xlinkHref "assets/hero.svg#hero"
+            , SvgAttr.x <| String.fromInt <| Tuple.first hero.pos - 5
+            , SvgAttr.y <| String.fromInt <| Tuple.second hero.pos - 10
             ]
             []
         , drawLives hero.hp
@@ -235,11 +261,46 @@ startMove hero =
     { hero | heroDir = direction hero }
 
 
+startShooting :
+    { a | hero : Hero, heroBullets : List HeroBullet }
+    -> { a | hero : Hero, heroBullets : List HeroBullet }
+startShooting ({ hero, heroBullets } as model) =
+    if not hero.shootingAnimation.isActive then
+        let
+            animation =
+                hero.shootingAnimation
+
+            newAnimation =
+                { animation | isActive = True, elapsed = 0 }
+
+            newHero =
+                { hero | shootingAnimation = newAnimation }
+        in
+        { model | hero = newHero, heroBullets = shootBullet hero :: heroBullets }
+
+    else
+        model
+
+
+{-| stop the shooting animation
+-}
+stopShooting : Hero -> Hero
+stopShooting hero =
+    let
+        animation =
+            hero.shootingAnimation
+
+        newAnimation =
+            { animation | isActive = False }
+    in
+    { hero | shootingAnimation = newAnimation }
+
+
 {-| make the hero shoot a bullet
 -}
 shootBullet : Hero -> HeroBullet
 shootBullet hero =
-    HeroBullet (moveBy ( heroWidth // 2, -bulletHeight ) hero.pos) 0 -5
+    HeroBullet hero.pos 0 -10
 
 
 {-| animate the hero bullets for a new frame
@@ -309,14 +370,12 @@ drawHeroBullet bullet =
         ( x, y ) =
             bullet.posBullet
     in
-    Svg.rect
+    Svg.svg
         [ SvgAttr.x <| String.fromInt x
         , SvgAttr.y <| String.fromInt y
-        , SvgAttr.fill "blue"
-        , SvgAttr.width <| String.fromInt bulletWidth
-        , SvgAttr.height <| String.fromInt bulletHeight
         ]
         []
+
 
 {-| return player superpower selection to the function that calls it
 -}
@@ -324,17 +383,20 @@ selectSuperPower : Hero -> Int
 selectSuperPower hero =
     hero.spSelection
 
+
 {-| set superpower from player selection
 -}
 setSuperpower : Hero -> Int -> Hero
 setSuperpower hero selection =
     { hero | spSelection = selection }
 
+
 {-| reduce superpower instances by 1
 -}
 useSuperpower : Hero -> Hero
 useSuperpower hero =
     { hero | spInstance = hero.spInstance - 1 }
+
 
 {-| set the ATK of the hero to be doubled
 -}
