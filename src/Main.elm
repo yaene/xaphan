@@ -35,6 +35,7 @@ type State
     | Paused
     | Cleared
     | Controls
+    | Selects
     | GameOver
 
 
@@ -60,10 +61,10 @@ view model =
     let
         backgroundUrl =
             if model.state == Initial then
-                "url(/assets/Initial_Page.jpg)"
+                "url(assets/Initial_Page.jpg)"
 
             else
-                "url(/assets/background.jpg)"
+                "url(assets/background.jpg)"
 
         content =
             case model.state of
@@ -95,6 +96,9 @@ view model =
 
                 Controls ->
                     [ drawModal ControlsInfo ]
+
+                Selects ->
+                    [ drawModal SelectionPage ]
     in
     Html.div
         [ HtmlAttr.style "display" "flex"
@@ -125,7 +129,7 @@ drawInitialPage =
         , HtmlAttr.style "height" "80px"
         , HtmlAttr.style "justify-content" "space-evenly"
         ]
-        [ StyledComponents.button "New Game" NextLevel [ HtmlAttr.style "margin-bottom" "20px" ]
+        [ StyledComponents.button "New Game" Selecting [ HtmlAttr.style "margin-bottom" "20px" ]
         , StyledComponents.button "Controls" ShowControls []
         ]
 
@@ -174,6 +178,14 @@ key on keycode =
         87 ->
             MoveHeroUp on
 
+        -- key: x
+        88 ->
+            if on then
+                HeroUseSuperpower
+
+            else
+                Noop
+
         -- key: z
         90 ->
             HeroShootBullet on
@@ -195,6 +207,9 @@ update msg model =
     let
         hero =
             model.hero
+
+        atkDoubled =
+            model.hero.atkDoubled
     in
     case msg of
         MoveHeroLeft on ->
@@ -226,6 +241,9 @@ update msg model =
             else
                 ( { model | hero = Hero.stopShooting hero }, Cmd.none )
 
+        HeroUseSuperpower ->
+            ( model |> useSuperPower, Cmd.none )
+
         Tick elapsed ->
             model |> animate elapsed
 
@@ -237,7 +255,7 @@ update msg model =
                 ( newModel, _ ) =
                     init ()
             in
-            ( { newModel | enemies = loadLevel <| model.level + 1, state = Playing, level = model.level + 1 }, Cmd.none )
+            ( { newModel | enemies = loadLevel <| model.level + 1, state = Playing, level = model.level + 1, hero = loadSpSelection newModel.hero model.hero.spSelection }, Cmd.none )
 
         Pause ->
             if model.state == Playing then
@@ -252,18 +270,29 @@ update msg model =
         Reset ->
             init ()
 
+        Selecting ->
+            ( { model | state = Selects }, Cmd.none )
+
+        SelectSuperpower power ->
+            ( { model | hero = setSuperpower model.hero power, state = Playing, enemies = loadLevel <| model.level + 1, level = model.level + 1 }, Cmd.none )
+
         Retry ->
             let
                 ( newModel, _ ) =
                     init ()
             in
-            ( { newModel | enemies = loadLevel <| model.level, level = model.level, state = Playing }, Cmd.none )
+            ( { newModel | enemies = loadLevel <| model.level, level = model.level, state = Playing, hero = loadSpSelection newModel.hero model.hero.spSelection }, Cmd.none )
 
         ShowControls ->
             ( { model | state = Controls }, Cmd.none )
 
         Noop ->
             ( model, Cmd.none )
+
+
+loadSpSelection : Hero -> Int -> Hero
+loadSpSelection nHero oldSpSelection =
+    { nHero | spSelection = oldSpSelection }
 
 
 animate : Float -> Model -> ( Model, Cmd Msg )
@@ -309,6 +338,36 @@ newState model =
 
     else
         model
+
+
+useSuperPower : Model -> Model
+useSuperPower model =
+    let
+        selection =
+            selectSuperPower model.hero
+    in
+    case selection of
+        1 ->
+            { model | enemyBullets = spClearBullets model.enemyBullets model.hero, hero = model.hero |> Hero.useSuperpower }
+
+        2 ->
+            { model | hero = model.hero |> atkDouble |> Hero.useSuperpower }
+
+        _ ->
+            model
+
+
+spClearBullets : List EnemyBullet -> Hero -> List EnemyBullet
+spClearBullets enemyBullets hero =
+    let
+        ins =
+            hero.spInstance
+    in
+    if ins > 0 then
+        []
+
+    else
+        enemyBullets
 
 
 isLevelCleared : List Enemy -> Bool
