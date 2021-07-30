@@ -58,6 +58,13 @@ init _ =
 view : Model -> Html.Html Msg
 view model =
     let
+        backgroundUrl =
+            if model.state == Initial then
+                "url(/assets/Initial_Page.jpg)"
+
+            else
+                "url(/assets/background.jpg)"
+
         content =
             case model.state of
                 Initial ->
@@ -98,7 +105,10 @@ view model =
             [ HtmlAttr.style "display" "flex"
             , HtmlAttr.style "width" "100vh"
             , HtmlAttr.style "height" "100vh"
-            , HtmlAttr.style "background-image" "url(/assets/background.png)"
+            , HtmlAttr.style "background-image" backgroundUrl
+            , HtmlAttr.style "background-size" "contain"
+            , HtmlAttr.style "background-repeat" "no-repeat"
+            , HtmlAttr.style "background-position" "center"
             , HtmlAttr.style "justify-content" "center"
             ]
             content
