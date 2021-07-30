@@ -137,7 +137,7 @@ deactivateAtkDouble elapsed model =
 
     else if nElapsed >= 5000 then
         { model
-            | hero = updateElapsed (deAtkDouble model.hero) -5000
+            | hero = updateElapsed (deAtkDouble model.hero) 0
         }
 
     else
@@ -146,7 +146,7 @@ deactivateAtkDouble elapsed model =
 
 updateElapsed : Hero -> Float -> Hero
 updateElapsed hero nElapsed =
-    { hero | spElapsed = hero.spElapsed + nElapsed }
+    { hero | spElapsed = nElapsed }
 
 
 animateShooting :
