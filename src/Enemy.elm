@@ -104,18 +104,23 @@ bulletSpeed =
     10
 
 
+defaultHP : Int
+defaultHP =
+    15
+
+
 {-| Create a basic enemy that only shoots straight down
 -}
 newBasicEnemy : Pos -> Dir -> Enemy
 newBasicEnemy pos dir =
-    Enemy pos 5 5 dir (newAnimation 1500 0) (newAnimation 1000 0) Basic Nothing
+    Enemy pos defaultHP defaultHP dir (newAnimation 1500 0) (newAnimation 1000 0) Basic Nothing
 
 
 {-| Create an enemy that shoots in a few directions at once
 -}
 newSunEnemy : Pos -> Dir -> Enemy
 newSunEnemy pos dir =
-    Enemy pos 5 5 dir (newAnimation 1500 0) (newAnimation 1000 0) Sun Nothing
+    Enemy pos defaultHP defaultHP dir (newAnimation 1500 0) (newAnimation 1000 0) Sun Nothing
 
 
 {-| Create an "fake" enemy that shoots in circles and doesnt show on the screen.
@@ -131,8 +136,8 @@ newEnvironmentalEnemy pos delay =
 newSpiralEnemy : Pos -> Dir -> Float -> Enemy
 newSpiralEnemy pos dir startElapsed =
     Enemy pos
-        5
-        5
+        defaultHP
+        defaultHP
         dir
         (newAnimation 1500 0)
         (Animation startElapsed 1500 False True 0 0)
@@ -147,7 +152,7 @@ newSpiralEnemy pos dir startElapsed =
 -}
 finalBoss : Pos -> Dir -> Enemy
 finalBoss pos dir =
-    Enemy pos 10 10 dir (newAnimation 1500 0) (newAnimation 1000 0) Final Nothing
+    Enemy pos 30 30 dir (newAnimation 1500 0) (newAnimation 1000 0) Final Nothing
 
 
 {-| Draw all the enemies in a list
